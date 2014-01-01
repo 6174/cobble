@@ -1,97 +1,170 @@
 /**
- * @desc:  robot, mock user ations
+ * @desc:  Promise, mock user ations
  * @author: chenxuejia
  * @email: chenxuejia67@gmail.com
  * @usage:
  *
  *     click, wait, tilhas, ok
- *         Robot().click("#btn").wait(1).dblclick("#newBtn").tilhas("#someDom").do(action).wait(3).ok();
+ *         Promise().click("#btn").wait(1).dblclick("#newBtn").tilhas("#someDom").do(action).wait(3).ok();
  *
  *     repeat
- *         Robot().repeat(4, action, 2000).do(action).ok();
- *         Robot().repeat(1, [action1, action2, action3], 2000)
+ *         Promise().repeat(4, action, 2000).do(action).ok();
+ *         Promise().repeat(1, [action1, action2, action3], 2000)
  */
 define(function(require, exports, module) {
 
 	// 通过 require 引入依赖
 	var jquery = require('jquery');
 
-	function Robot() {
-		if (!(this instanceof Robot)) {
-			return new Robot(arguments);
+	/**
+	 * @class -- Promise
+	 * @desc  -- Promise A+ 模型实现
+	 */
+	function Promise(state) {
+		if (!(this instanceof Promise)) {
+			return new Promise(1);
 		}
 
 		//-- promise modle
 		//== promise 三状态 pending(默认状态) ,fulfilled, rejected
-		this.state = 'pending';
-		this.ok = function(obj) {
-			return obj
-		};
-		this.thens = [];
+		this._resolves = [];
+		this._rejects = [];
+		this._readyState = state || Promise.PENDING;
+		this._data = null;
+		this._reason = null;
 	}
-	var RobotProto = Robot.prototype;
+	mix(Promise, {
+		PENDING: 0,
+		FULFILLED: 1,
+		REJECTED: 2,
+		isPromise: function(obj) {
+			return obj != null && typeof obj['then'] == 'function';
+		}
+	});
 
 	/**
-	 * @method -- resolve
-	 * @desc   -- 默认状态可以单向转移到完成状态
+	 * @class -- Defer
+	 * @desc  -- 负责promise的resolve和reject
 	 */
-	RobotProto.resolve = function(obj) {
-		if (this.state !== 'pending') {
-			return;
-		}
-		this.state = 'fulfilled';
-		this.result = this.ok(obj);
-
-		for (var i = 0, len = this.thens.length; i < len; i++) {
-			var then = this.thens[i];
-			this._fire(then.promise, then.ok);
-		}
-		return this;
+	function Defer() {
+		this.promise = new Promise();
 	}
 
-	RobotProto._fire = function(nextPromise, nextOk) {
-		var nextResult = nextOk(this.result);
-		if (nextResult instanceof Robot) {
-			nextResult._then(function(obj) {
-				nextPromise.resolve(obj);
+	Defer.prototype = {
+		resolve: function(data) {
+			var promise = this.promise;
+			if (promise._readyState != Promise.PENDING) {
+				return;
+			}
+
+			promise._readyState = Promise.FULFILLED;
+			promise._data = data;
+
+			promise._resolves.forEach(function(handler) {
+				handler(data);
 			});
-		} else {
-			nextPromise.resolve(nextResult);
+		},
+		reject: function(reason) {
+			var promise = this.promise;
+			if (promise._readyState != Promise.PENDING) {
+				return;
+			}
+			promise._readyState = Promise.REJECTED;
+			promise._reason = reason;
+
+			var handler = promise._rejects[0];
+			if (handler) {
+				handler(reason);
+			}
 		}
-		return nextPromise;
+	};
+
+	function mix(a, b) {
+		for (attr in b) {
+			a[attr] = b[attr];
+		}
 	}
 
-	RobotProto._push = function(nextPromise, nextOk) {
-		this.thens.push({
-			promise: nextPromise,
-			ok: nextOk
+	var PromiseProto = Promise.prototype;
+	PromiseProto.then = function(onFulfilled, onRejected) {
+		var deferred = new Defer();
+
+
+		if (this._readyState === Promise.PENDING) {
+			this._resolves.push(fulfill);
+
+			if (onRejected) {
+				this._rejects.push(onRejected);
+			} else {
+				//为了让reject向后传递 
+				this._rejects.push(function(reason) {
+					deferred.reject(reason);
+				});
+			}
+			return deferred.promise;
+		} else if (this._readyState === Promise.FULFILLED) {
+			var self = this;
+			return fulfill(self._data);
+		}
+
+		function fulfill(data) {
+			var ret = onFulfilled ? onFulfilled(data) : data;
+			if (Promise.isPromise(ret)) {
+				ret.then(function(data) {
+					deferred.resolve(data);
+				});
+				return deferred.promise
+			} else {
+				deferred.resolve(ret);
+				return ret;
+			}
+		}
+	}
+
+	PromiseProto.otherwise = function(onRejected) {
+		return this.then(undefined, onRejected);
+	}
+
+	PromiseProto.defer = function(){
+		return new Defer();
+	}
+
+	PromiseProto.all = function(promises){
+		var defer = new Defer();
+		var n = 0, result = [];
+		//--solver 里边的n表示完成的个数
+		promises.forEach(function(promise){
+			promise.then(function(ret){
+				result.push(ret);
+				if(n++ >= promises.length) {
+					defer.resolve(result);
+				}
+			});
 		});
-		return nextPromise;
+		return defer.promise;
 	}
 
-
-	RobotProto._then = function(nextOk){
-		var promise = new Robot();
-		if (this.state === 'fulfilled'){
-			//--立即调用nextOk
-			return this._fire(promise, nextOk);
-		} else {
-			return this._push(promise, nextOk);
-		}
+	PromiseProto.any = function(promises){
+		var defer = new Defer();
+		promises.forEach(function(promise){
+			promise.then(function(ret){
+				defer.resolve(ret);
+			});
+		});
+		return defer.promise;
 	}
-
 
 	/**
 	 * mock click
 	 */
-	RobotProto.click = function(id) {
-		var promise = this._then(function(){
+	PromiseProto.click = function(id) {
+		var promise = this.then(function() {
 			$(id).click();
-			var promise = new Robot();
+			var defer = new Defer();
 			setTimeout(function() {
-				promise.resolve();
+				defer.resolve();
 			}, 10);
-			return promise;
+			return defer.promise;
 		});
 		return promise;
 	}
@@ -100,20 +173,16 @@ define(function(require, exports, module) {
 	/**
 	 * wait
 	 */
-	RobotProto.wait = function(seconds) {
-		return this._then(function(){
-			var promise = new Robot();
+	PromiseProto.wait = function(seconds) {
+		return this.then(function() {
+			var defer = new Defer();
 			setTimeout(function() {
-				promise.resolve();
-			}, seconds*1000);
-			return promise;
+				defer.resolve();
+			}, seconds * 1000);
+			return defer.promise;
 		});
 	}
 
-	RobotProto.run = function(){
-		this.resolve();
-	}
-
 	// // 或者通过 module.exports 提供整个接口
-	module.exports = Robot;
+	module.exports = Promise;
 });

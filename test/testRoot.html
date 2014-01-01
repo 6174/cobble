@@ -3,6 +3,7 @@
 		<meta charset="uft-8">
 		<title>test robot</title>
 		<script src="../src/lib/sea.js"></script>
+		<!-- // <script src="../src/qt.js"></script> -->
 	</head>
 <body>
 	<!--all style  -->
@@ -43,18 +44,22 @@
 				console.log('click me');
 			});
 
-			var robot = Robot(); 
-			robot
+			Robot()
 			.wait(1)
-			._then(function(){
+			.then(function(){
 				console.log('first then');
 			})
-			.wait(1)
 			.click('#TestBtn')
 			.wait(1) 
 			.click('#TestBtn');
-			robot.run();
-			
+
+			// Robot()
+			// .wait(3)
+			// ._then(function(){
+			// 	console.log('I am the next robot')
+			// })
+			// .wait(1)
+			// .click('#TestBtn');
 		});
 
 	</script>
