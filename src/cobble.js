@@ -15,40 +15,40 @@ define(function(require, exports, module) {
 		robot: robot
 	});
 
-	Cobble.describe = function describe() {
-		/**
-		 *
-		 */
-		describe({
-			printCallStack: true,
-			action: function() {
-				return robot()
-					.input('#UserName', '6174')
-					.wait(1)
-					.input('#Password', '131420')
-					.wait(1)
-					.click('#Login')
-					.wait(1)
-					.done();
-			},
-			describes: function() {
-				describe('user login', function() {
-					spy('OnFillUserName', function(callShot) {
-						// assertStuff;
-					});
-					spy('OnFillPassword', function(callShot) {
-						// assertStuff
-					});
-					spy('clickLogin', function(callShot) {
-						// assertStuff
-					});
-					spy('validate', function(callShot) {
-						// assertStuff
-					});
-					assert(spy('validate').shouldCallAfter('clickLogin'));
-				});
-			}
-		});
-	}
+	/**
+	 * intention coding 
+	//  */
+	// Cobble({
+	// 	printCallStack: true,
+	// 	action: function() {
+	// 		return robot()
+	// 			.input('#UserName', '6174')
+	// 			.wait(1)
+	// 			.input('#Password', '131420')
+	// 			.wait(1)
+	// 			.click('#Login')
+	// 			.wait(1)
+	// 			.done();
+	// 	},
+	// 	describes: function() {
+	// 		describe('user login', function() {
+	// 			watch('OnFillUserName', function(callShot) {
+	// 				// assertStuff;
+	// 			});
+	// 			watch('OnFillPassword', function(callShot) {
+	// 				// assertStuff
+	// 			});
+	// 			watch('clickLogin', function(callShot) {
+	// 				// assertStuff
+	// 			});
+	// 			watch('validate', function(callShot) {
+	// 				// assertStuff
+	// 			});
+	// 			assert(spy('validate').shouldCallAfter('clickLogin'));
+	// 		});
+	// 	}
+	// });
 
+	Cobble.describe = function describe() {
+	}
 });

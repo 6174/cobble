@@ -18,22 +18,58 @@ define(function(require, exports, module) {
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var callId = 0;
 
+	//--所有的spy过后的函数都可以在这里看到
+	var functionHashTable = {};
 
-	function spy(){
-
+	function spy(arg1, namespace) {
+		var type = util.typeOf(arg1);
+		var ret;
+		if(type == 'function'){
+			var name = getFuncName(arg1);
+			ret = spyAFunc(arg1, namespace? namespace + name : name, name);
+		}else if(type == 'object'){
+			ret = spyAObject(arg1, '');
+		}
 	}
 	util.mix(spy, util.getEventHub());
 
-	function spyAObject(obj) {
-		for(var attr in obj){
-			if(hasOwn.call(obj, attr))
+	function spyAObject(obj, namespace) {
+		breadthFirstSearchObjForFunc(obj, namespace, name, {});
+	}
+
+	function breadthFirstSearchObjForFunc(obj, fullname, name, parent) {
+		var type = util.typeOf(obj),
+			itemname, item;
+		if (type === 'function') {
+			spyAFunc(obj, fullname, name, parent);
+		}
+
+		if (obj && type !== 'array' && type !== 'string' && type !== 'number' && util.typeOf(obj.hasOwnProperty) === 'function') {
+			for (itemname in obj) {
+				if (hasOwn.call(obj, itemname)) {
+					item = obj[itemname];
+					// window.window === window
+					// jQuery.fn.constructor === jQuery will introduce endless loop
+					if (item !== obj && itemname !== 'constructor') {
+						checkObj(item, fullname + '.' + itemname, itemname, obj);
+					}
+				}
+			}
 		}
 	}
 
-	function spyAFunc(func) {
+	function spyAFunc(func, fullname, name, parent) {
+		parent = parent || {};
+		parent[name + "_backup"] = func;
+		functionHashTable[fullname + "_backup"] = func;
+
 		func = makeSureAFunc(func);
 		func = wrapFuncWithSpyStuff(func);
 		decorateFunc(func);
+
+		parent[name] = func;
+		functionHashTable[fullname] = func;
+		return func;
 	}
 
 	function makeSureAFunc(func) {
@@ -45,11 +81,23 @@ define(function(require, exports, module) {
 	}
 
 	function wrapFuncWithSpyStuff(func) {
-		return util.wrap(func, function(originFunc) {
+		var newFunc = util.wrap(func, function(originFunc) {
 			var args = slice.call(arguments, 1);
 			var thisFunc = arguments.callee;
 			var start = +new Date;
-			var result = originFunc.apply(this, args);
+
+			// If this function call is through "new" operator.
+			if (arguments.callee.prototype && this instanceof arguments.callee) {
+				// http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
+				function F(args2) {
+					return originFunc.apply(this, args2);
+				}
+				F.prototype = originFunc.prototype;
+				result = new F(arguments);
+			} else {
+				result = originFunc.apply(this, arguments);
+			}
+
 			thisFunc._callShot = {
 				time: +new Date - start,
 				id: called++,
@@ -58,8 +106,14 @@ define(function(require, exports, module) {
 				stack: (new Error('-_-')).stack,
 				thisValue: this
 			}
+
 			spy.fire('call-' + thisFunc.name, thisFunc._callShot);
 		});
+
+		//--原来方法的变量和原型
+		util.mix(newFunc, func);
+		newFunc.prototype = func.prototype;
+		return newFunc;
 	}
 
 	function decorateFunc(func) {
@@ -84,7 +138,7 @@ define(function(require, exports, module) {
 			}
 		}
 		mix(func, spyApi);
-		func.name = getFuncName()
+		func.name = getFuncName('')
 	}
 
 	function invokeFunc(func, args, thisValue) {
