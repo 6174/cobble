@@ -157,17 +157,36 @@ define(function(require, exports, module) {
 	/**
 	 * mock click
 	 */
-	PromiseProto.click = function(id) {
+	PromiseProto.click = function(id, time) {
 		var promise = this.then(function() {
 			$(id).click();
 			var defer = new Defer();
 			setTimeout(function() {
 				defer.resolve();
-			}, 10);
+			}, time ? time * 1000 : 10);
 			return defer.promise;
 		});
 		return promise;
 	}
+
+	/**
+	 * mock fill input filed
+	 */
+	PromiseProto.input = function(id, value, time){
+		var promise = this.then(function() {
+			$(id).val(value);
+			var defer = new Defer();
+			setTimeout(function(){
+				defer.resolve();
+			}, time ? time * 1000 : 10)
+			return defer.promise;
+		});
+		return promise;
+	}
+
+	/**
+	 * mock select
+	 */
 
 
 	/**

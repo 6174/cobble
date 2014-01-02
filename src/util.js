@@ -13,7 +13,7 @@ define(function(require, exports, module) {
 
 	var mix = util.mix = function(obj, trait, isCoverOriginMethod) {
 		for (var attr in trait) {
-			if (trait.hasOwnProperty(attr) && !(isCoverOriginMethod && obj[attr])) {
+			if (hasOwn.call(trait, attr) && !(isCoverOriginMethod && obj[attr])) {
 				obj[attr] = trait[attr];
 			}
 		}
@@ -41,12 +41,11 @@ define(function(require, exports, module) {
 		}
 	};
 
-	util.create = function(o){
+	util.create = function(o) {
 		function F() {};
 		F.prototype = o;
 		return new F();
 	}
-
 
 	mix(util, {
 		isDOMNode: function isDOMNode(obj) {
@@ -78,17 +77,59 @@ define(function(require, exports, module) {
 			}
 			return name;
 		},
-		typeOf: function (value) {
-            if (value === null) {
-                return "null";
-            }
-            else if (value === undefined) {
-                return "undefined";
-            }
-            var string = Object.prototype.toString.call(value);
-            return string.substring(8, string.length - 1).toLowerCase();
-        },
+		typeOf: function(value) {
+			if (value === null) {
+				return "null";
+			} else if (value === undefined) {
+				return "undefined";
+			}
+			var string = Object.prototype.toString.call(value);
+			return string.substring(8, string.length - 1).toLowerCase();
+		},
 
 	});
+
+	util.getEventHub = function() {
+		return {
+			on: function(type, callback) {
+				if (!util.isFunction(callback)) {
+					throw new Error('callback is not a function');
+					return;
+				}
+				this._callback = this._callback || {};
+				this._callback[type] = this._callback[type] || [];
+				this._callback[type].push(callback);
+				return this;
+			},
+			detach: function(type, callback) {
+				this._callback = this._callback || {};
+				if (!type) {
+					this._callback = {};
+				} else if (!callback) {
+					this._callback[type] = [];
+				} else if (this._callback[type] && this._callback[type].length > 0) {
+					var index = S.indexOf(callback, this._callback[type]);
+					if (index != -1) this._callback[type].splice(index, 1);
+				}
+				return this;
+			},
+			fire: function(type, data) {
+				if (this._callback) {
+					var arr = this._callback[type];
+					if (arr && arr.length > 0) {
+						data = data || {};
+						data.type = type;
+						data.target = this;
+
+						for (var i = arr.length - 1; i >= 0; i--) {
+							S.isFunction(arr[i]) && arr[i].call(this, data);
+						}
+					}
+				}
+				return this;
+			}
+		};
+	}
+
 	module.exports = util;
 });
