@@ -4,81 +4,91 @@
  */
 define(function(require, exports, module) {
 	var util = {};
+	var div = typeof document != "undefined" && document.createElement("div");
+	var hasOwn = Object.prototype.hasOwnProperty;
+
 	util.guid = function() {
 		return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 	};
-	
-	util.mix = _.mix;
-		
-	/**
-	 * proxy
-	 */
+
+	var mix = util.mix = function(obj, trait, isCoverOriginMethod) {
+		for (var attr in trait) {
+			if (trait.hasOwnProperty(attr) && !(isCoverOriginMethod && obj[attr])) {
+				obj[attr] = trait[attr];
+			}
+		}
+	}
+
 	util.proxy = function(context, func) {
 		return function() {
 			func.apply(context, arguments);
 		}
 	};
 
-	/**
-	 * function wraper
-	 */
+	/*
+     eg:
+     f=wrap(f, function(org,x,y){
+         console.log("x:"+x,"y:"+y);
+          var r=org(x,y);
+          console.log("result:"+r);
+       });
+     */
 	util.wrap = function(func, wrapper) {
 		var __method = func;
 		return function() {
 			var args = Array.prototype.slice.call(arguments);
 			return wrapper.apply(this, [__method.bind(this)].concat(args));
 		}
-		/*
-		     eg:
-		     f=wrap(f, function(org,x,y){
-		         console.log("x:"+x,"y:"+y);
-		          var r=org(x,y);
-		          console.log("result:"+r);
-		       });
-		     */
 	};
 
-
-	if (typeof Object.create !== "function") {
-		Object.create = function(o) {
-			function F() {}
-			F.prototype = o;
-			return new F();
-		};
+	util.create = function(o){
+		function F() {};
+		F.prototype = o;
+		return new F();
 	}
 
-	/**
-	 *Klass 语法糖
-	 */
-	util.Klass = function(Parent, props) {
-		var Child, F, i;
 
-		Child = function() {
-			var parent = Child.parent;
-			while(parent){
-				parent.prototype && parent.prototype.hasOwnProperty("__construct") && parent.prototype.__construct.apply(this, arguments);
-				parent = parent.parent;
+	mix(util, {
+		isDOMNode: function isDOMNode(obj) {
+			var success = false;
+			try {
+				obj.appendChild(div);
+				success = div.parentNode == obj;
+			} catch (e) {
+				return false;
+			} finally {
+				try {
+					obj.removeChild(div);
+				} catch (e) {}
 			}
-			if (Child.prototype.hasOwnProperty("__construct")) {
-				Child.prototype.__construct.apply(this, arguments);
+
+			return success;
+		},
+		isElement: function isElement(obj) {
+			return div && obj && obj.nodeType === 1 && isDOMNode(obj);
+		},
+		isFunction: function isFunction(obj) {
+			return typeof obj === "function" || !! (obj && obj.constructor && obj.call && obj.apply);
+		},
+		functionName: function functionName(func) {
+			var name = func.displayName || func.name;
+			if (!name) {
+				var matches = func.toString().match(/function ([^\s\(]+)/);
+				name = matches && matches[1];
 			}
-			this.super = Parent.prototype;
-		};
+			return name;
+		},
+		typeOf: function (value) {
+            if (value === null) {
+                return "null";
+            }
+            else if (value === undefined) {
+                return "undefined";
+            }
+            var string = Object.prototype.toString.call(value);
+            return string.substring(8, string.length - 1).toLowerCase();
+        },
 
-		Parent = Parent || Object;
-		F = function() {};
-		F.prototype = Parent.prototype;
-		Child.prototype = new F();
-		Child.parent = Parent;
-		Child.super = Parent.prototype;
-		Child.prototype.constructor = Child;
-
-		for (i in props) {
-			if (props.hasOwnProperty(i)) {
-				Child.prototype[i] = props[i];
-			}
-		}
-
-		return Child;
-	}
+	});
+	module.exports = util;
 });
