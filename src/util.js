@@ -31,6 +31,7 @@ define(function(require, exports, module) {
          console.log("x:"+x,"y:"+y);
           var r=org(x,y);
           console.log("result:"+r);
+          return r;
        });
      */
 	util.wrap = function(func, wrapper) {

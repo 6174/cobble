@@ -30,8 +30,10 @@ define(function(require, exports, module) {
 		}else if(type == 'object'){
 			ret = spyAObject(arg1, '');
 		}
+		return ret;
 	}
 	util.mix(spy, util.getEventHub());
+	spy.functionHashTable = functionHashTable;
 
 	function spyAObject(obj, namespace) {
 		breadthFirstSearchObjForFunc(obj, namespace, name, {});
@@ -64,8 +66,8 @@ define(function(require, exports, module) {
 		functionHashTable[fullname + "_backup"] = func;
 
 		func = makeSureAFunc(func);
-		func = wrapFuncWithSpyStuff(func);
 		decorateFunc(func);
+		func = wrapFuncWithSpyStuff(func);
 
 		parent[name] = func;
 		functionHashTable[fullname] = func;
@@ -81,9 +83,10 @@ define(function(require, exports, module) {
 	}
 
 	function wrapFuncWithSpyStuff(func) {
-		var newFunc = util.wrap(func, function(originFunc) {
+		var funcBackup = func;
+		var func = util.wrap(func, function(originFunc) {
 			var args = slice.call(arguments, 1);
-			var thisFunc = arguments.callee;
+			var thisFunc = func;
 			var start = +new Date;
 
 			// If this function call is through "new" operator.
@@ -93,27 +96,30 @@ define(function(require, exports, module) {
 					return originFunc.apply(this, args2);
 				}
 				F.prototype = originFunc.prototype;
-				result = new F(arguments);
+				result = new F(args);
 			} else {
-				result = originFunc.apply(this, arguments);
+				result = originFunc.apply(this, args);
 			}
 
+			var end = +new Date;
 			thisFunc._callShot = {
-				time: +new Date - start,
-				id: called++,
+				startTime: start,
+				endTime: end,
+				time: end - start,
 				args: args,
 				result: result,
 				stack: (new Error('-_-')).stack,
 				thisValue: this
 			}
-
-			spy.fire('call-' + thisFunc.name, thisFunc._callShot);
+			thisFunc.incrementCallCount();
+			spy.fire('call-' + thisFunc.fullname, thisFunc._callShot);
+			return result;
 		});
 
 		//--原来方法的变量和原型
-		util.mix(newFunc, func);
-		newFunc.prototype = func.prototype;
-		return newFunc;
+		util.mix(func, funcBackup);
+		func.prototype = funcBackup.prototype;
+		return func;
 	}
 
 	function decorateFunc(func) {
@@ -137,8 +143,9 @@ define(function(require, exports, module) {
 				this.calls.push(this._callShot);
 			}
 		}
-		mix(func, spyApi);
-		func.name = getFuncName('')
+		util.mix(func, spyApi);
+		func.reset();
+		return func;
 	}
 
 	function invokeFunc(func, args, thisValue) {
