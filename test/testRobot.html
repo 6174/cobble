@@ -1,0 +1,69 @@
+<html>
+	<head>
+		<meta charset="uft-8">
+		<title>test robot</title>
+		<script src="../src/lib/sea.js"></script>
+		<!-- // <script src="../src/qt.js"></script> -->
+	</head>
+<body>
+	<!--all style  -->
+	<style>
+
+	</style>
+
+	<!-- all ui elements -->
+	<div class="container">
+		<div class="inner">
+			<input  id="UserName" type="text" value="test"/>
+			<button id="TestBtn">hello cobble</button>
+		</div>
+	</div>
+
+	<!-- all scripts  -->
+	<script>
+
+		seajs.config({
+			base: "../src/",
+			// 设置路径，方便跨目录调用
+            paths: {
+                'lib': 'lib',
+                'js': 'javascripts',
+                'css': 'stylesheets'
+            },
+
+			alias: {
+			    "jquery": "lib/jquery.js",
+			    "when": "lib/when.js",
+			    "robot": "robot.js",
+			    "util": "util.js"
+			}
+		});
+
+		seajs.use(['robot', 'when', 'jquery'], function(Robot, when){
+			var btn = $('#TestBtn');
+			btn.on('click', function(){
+				console.log('click me');
+			});
+
+			Robot()
+			.wait(1)
+			.then(function(){
+				console.log('first then');
+			})
+			.input('#UserName', 'haha I am xuejia!')
+			.wait(2)
+			.click('#TestBtn')
+			.wait(1) 
+			.click('#TestBtn');
+			// Robot()
+			// .wait(3)
+			// ._then(function(){
+			// 	console.log('I am the next robot')
+			// })
+			// .wait(1)
+			// .click('#TestBtn');
+		});
+
+	</script>
+</body>
+</html>
