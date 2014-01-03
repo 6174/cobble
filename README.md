@@ -34,8 +34,7 @@
 
 ##使用  
 * 期望的结果， 下面是一个简单的login使用sample 
-```
-     */
+```javascript  
     cobble({ 
         //--一些配置参数
         name: "user login",

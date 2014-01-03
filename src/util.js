@@ -108,9 +108,19 @@ define(function(require, exports, module) {
 				return "null";
 			} else if (value === undefined) {
 				return "undefined";
-			}
+			} 
+
 			var string = Object.prototype.toString.call(value);
-			return string.substring(8, string.length - 1).toLowerCase();
+			string = string.substring(8, string.length - 1).toLowerCase()
+			if(string == 'number' && value != +value){
+				string = 'NaN';
+			}
+
+			if(string == 'global'){
+				string = 'object';
+			}
+			
+			return string;
 		},
 
 	});

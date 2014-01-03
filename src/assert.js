@@ -34,7 +34,7 @@ define(function(require, exports, module) {
 			this.fire("log", details);
 			return result;
 		},
-		equal: function equal(actual, expected, msg){
+		equal: function (actual, expected, msg){
 			return this.ok(_.isEqual(actual, expected), msg);
 		},
 		notEqual: function (actual, expected, msg){

@@ -15,7 +15,7 @@ define(function(require, exports, module) {
 		robot: robot
 	});
 
- 
 	Cobble.describe = function describe() {
+			
 	}
 });
