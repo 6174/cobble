@@ -1,5 +1,6 @@
-##一个专注于前端交互测试的framework
+##Cobble
 ----
+###一个专注于前端交互的测试框架
 
 ###介绍  
    
@@ -30,4 +31,49 @@
     - 测试case的编写  
     - 函数标记， 通过注释方式  
 * 解析， 写一个服务编译注释脚本， 返回编译过的脚本用于spy监控  
-    
+
+##使用  
+* 期望的结果， 下面是一个简单的login使用sample 
+```
+     */
+    cobble({ 
+        //--一些配置参数
+        name: "user login",
+        printCallStack: true,
+
+        //--mock 的用户行为， 目前在test/testRobot.html下面已经可以看到使用场景了, 使用promise A+模型极大的简化了异步行为的编写， 目前只有简单的click input wait方法 
+        action: function() {
+            return robot()
+                .input('#UserName', '6174')
+                .wait(1)
+                .input('#Password', '131420')
+                .wait(1)
+                .click('#Login')
+                .wait(1)
+                .done();
+        },
+        //--对模拟过程中的函数进行观察， 并通过callShot可以查看
+         函数调用的参数， 结果， 时间， 上下文情况，
+        watch: function() {
+                //--对函数调用的观察
+                watch('OnFillUserName', function(callShot) {
+                    // assertStuff;
+                });
+                watch('OnFillPassword', function(callShot) {
+                    // assertStuff
+                });
+                watch('clickLogin', function(callShot) {
+                    // assertStuff
+                });
+                watch('validate', function(callShot) {
+                    // assertStuff
+                });
+            });
+        },
+        //--模拟过程结束过后观察函数的调用情况
+        final: function(){
+                spy.called('OnFillUserName, clickLogin, validate');
+                spy('validate').shouldCallAfter('clickLogin');
+        }
+    });
+```
