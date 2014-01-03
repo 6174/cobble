@@ -20,13 +20,15 @@
 		alias: {
 		    "jquery": "lib/jquery.js",
 		    "when": "lib/when.js",
+		    "expect": "lib/expect.js",
+		    "_": "lib/underscore.js",
 		    "robot": "robot.js",
 		    "util": "util.js",
 		    'spy': 'spy.js'
 		}
 	});
 
-	seajs.use(['spy', 'util', 'jquery'], function(spy, util){
+	seajs.use(['spy', 'util', '_','jquery'], function(spy, util,  _){
 
 		var func = spy(function func1(a, b){
 			console.log('func1 called');
@@ -38,10 +40,15 @@
 		});
 
 		window.func = func;
+		console.log(func.callCount);
 		func(1, 2);
+		console.log(func.callCount);
 		func(3, 4);
+		console.log(func.callCount);
 		window.util = util;
 		window.spy = spy;
+
+		window._ = _;
 	});
 </script>
 </body>

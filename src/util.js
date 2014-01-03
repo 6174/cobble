@@ -48,6 +48,31 @@ define(function(require, exports, module) {
 		return new F();
 	}
 
+	/**
+	 * Escape text for attribute or text content.
+	 */
+	util.escapeText = function escapeText(s) {
+		if (!s) {
+			return "";
+		}
+		s = s + "";
+		// Both single quotes and double quotes (for attributes)
+		return s.replace(/['"<>&]/g, function(s) {
+			switch (s) {
+				case "'":
+					return "&#039;";
+				case "\"":
+					return "&quot;";
+				case "<":
+					return "&lt;";
+				case ">":
+					return "&gt;";
+				case "&":
+					return "&amp;";
+			}
+		});
+	}
+
 	mix(util, {
 		isDOMNode: function isDOMNode(obj) {
 			var success = false;

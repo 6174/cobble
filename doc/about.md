@@ -14,10 +14,12 @@
 
 ###设计 
 
-* 目前我的想法是将cobble分为两大部分  
+* 目前我的想法是将cobble分为以下几个部分  
 	- 一个前端robot， 用于模拟用户行为  
     - 测试describe部分  
-    - spy， 监控标记函数的执行 
+    - spy， 监控标记函数的执行
+    - expect 部分， 使用expect.js
+    - dom expect, 针对html的expect，dom结构属性样式
 * 测试的单位是最基本的函数单元， 验证的对象包括
 	- 参数
 	- 执行结果
