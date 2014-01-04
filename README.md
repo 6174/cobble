@@ -37,12 +37,12 @@
 ```javascript  
     cobble({ 
         //--一些配置参数
-        name: "user login",
+        name: "user login test",
         printCallStack: true,
 
         //--mock 的用户行为， 目前在test/testRobot.html下面已经可以看到使用场景了, 使用promise A+模型极大的简化了异步行为的编写， 目前只有简单的click input wait方法 
         action: function() {
-            return robot()
+                this.robot.
                 .input('#UserName', '6174')
                 .wait(1)
                 .input('#Password', '131420')
