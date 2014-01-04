@@ -69,11 +69,16 @@ define(function(require, exports, module) {
 		},
 		isA: function (typeString, obj, msg){
 			var type = util.typeOf(obj);
-			var errMsg = "type is " + type;
+			var errMsg = "  it's type is not " + typeString + " but " + type;
 			return  this.ok( type === typeString, msg, errMsg);
 		},
 		has: function(obj, key, msg){
-			var errMsg = "has no property: " + key;
+			var errMsg = '';
+			if(!_.isObject(obj)){
+				errMsg = "  basic type has no peroperty; ";
+				return this.ok(false, msg, errMsg);
+			}
+			errMsg = "  object has no property " + key;
 			return this.ok(_.has(obj, key), msg, errMsg);
 		}
 	});
@@ -85,6 +90,13 @@ define(function(require, exports, module) {
 	 */
 	Assert.on('log', function(data){
 		//--use reporter to report out of the masgs
+		var msg= '%c passed: '+ data.message;
+		var errMsg = '%c failed: ' + data.message + (data.errorMessage ? data.errorMessage : '');
+		if(data.result){
+			console.log(msg, "color:white; background-color:green");
+		} else {
+			console.log(errMsg, "color:white; background-color:red");
+		}
 	});
 
 	util.mix(Assert, {

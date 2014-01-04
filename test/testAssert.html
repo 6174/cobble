@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="uft-8">
+	<title>test robot</title>
+	<script src="../src/lib/sea.js"></script>
+	<!-- // <script src="../src/qt.js"></script> -->
+</head>
+<body>
+<script type="text/javascript">
+	seajs.config({
+		base: "../src/",
+		// 设置路径，方便跨目录调用
+        paths: {
+            'lib': 'lib',
+            'js': 'javascripts',
+            'css': 'stylesheets'
+        },
+
+		alias: {
+		    "jquery": "lib/jquery.js",
+		    "when": "lib/when.js",
+		    "expect": "lib/expect.js",
+		    "_": "lib/underscore.js",
+		    "robot": "robot.js",
+		    "util": "util.js",
+		    'spy': 'spy.js',
+		    'assert': 'assert.js'
+		}
+	});
+
+	seajs.use(['assert'], function(assert){
+		window.assert = assert;
+		console.log(assert);
+		assert.equal(1, 1, '1 等于 1');
+		assert.equal(1, 2, '1 等于 2');
+
+		assert.notEqual('username', 'nickname', 'username 不应该等于 nickname');
+		assert.notEqual('username', 'username', 'username 不应该等于 username');
+
+		assert.isArray([], "[]应该是一个数组");
+		assert.isArray({}, "{}应该是一个数组");
+
+		assert.has(1, 'body', "1 应该有 body属性");
+		assert.has(document, 'body', "document 应该有 body属性");
+		assert.has(document, 'haha', "document 应该有 haha属性");
+	});
+</script>
+</body>
+</html>>

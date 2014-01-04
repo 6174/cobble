@@ -119,7 +119,7 @@ define(function(require, exports, module) {
 			if(string == 'global'){
 				string = 'object';
 			}
-			
+
 			return string;
 		},
 
@@ -158,7 +158,7 @@ define(function(require, exports, module) {
 						data.target = this;
 
 						for (var i = arr.length - 1; i >= 0; i--) {
-							S.isFunction(arr[i]) && arr[i].call(this, data);
+							util.isFunction(arr[i]) && arr[i].call(this, data);
 						}
 					}
 				}
