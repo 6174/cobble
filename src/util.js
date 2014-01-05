@@ -49,6 +49,40 @@ define(function(require, exports, module) {
 	}
 
 	/**
+	 *Klass 语法糖
+	 */
+	util.Klass = function(Parent, props) {
+		var Child, F, i;
+
+		Child = function() {
+			var parent = Child.parent;
+			while (parent) {
+				parent.prototype && parent.prototype.hasOwnProperty("__construct") && parent.prototype.__construct.apply(this, arguments);
+				parent = parent.parent;
+			}
+			if (Child.prototype.hasOwnProperty("__construct")) {
+				Child.prototype.__construct.apply(this, arguments);
+			}
+			this.super = Parent.prototype;
+		};
+
+		Parent = Parent || Object;
+		F = function() {};
+		F.prototype = Parent.prototype;
+		Child.prototype = new F();
+		Child.parent = Parent;
+		Child.super = Parent.prototype;
+		Child.prototype.constructor = Child;
+
+		for (i in props) {
+			if (props.hasOwnProperty(i)) {
+				Child.prototype[i] = props[i];
+			}
+		}
+
+		return Child;
+	}
+	/**
 	 * Escape text for attribute or text content.
 	 */
 	util.escapeText = function escapeText(s) {
@@ -108,15 +142,15 @@ define(function(require, exports, module) {
 				return "null";
 			} else if (value === undefined) {
 				return "undefined";
-			} 
+			}
 
 			var string = Object.prototype.toString.call(value);
 			string = string.substring(8, string.length - 1).toLowerCase()
-			if(string == 'number' && value != +value){
+			if (string == 'number' && value != +value) {
 				string = 'NaN';
 			}
 
-			if(string == 'global'){
+			if (string == 'global') {
 				string = 'object';
 			}
 

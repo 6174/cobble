@@ -4,7 +4,7 @@
 define(function(require, exports, module){
 	var asyn = require('asyn');
 	var util = require('util');
-
+	
 	var Promise = asyn.Promise;
 	var Defer = asyn.Defer;
 
