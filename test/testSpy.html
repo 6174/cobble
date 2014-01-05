@@ -2,32 +2,13 @@
 <html>
 <head>
 	<meta charset="uft-8">
-	<title>test robot</title>
+	<title>test spy</title>
 	<script src="../src/lib/sea.js"></script>
+	<script src="seajsConfig.js"></script>
 	<!-- // <script src="../src/qt.js"></script> -->
 </head>
 <body>
 <script type="text/javascript">
-	seajs.config({
-		base: "../src/",
-		// 设置路径，方便跨目录调用
-        paths: {
-            'lib': 'lib',
-            'js': 'javascripts',
-            'css': 'stylesheets'
-        },
-
-		alias: {
-		    "jquery": "lib/jquery.js",
-		    "when": "lib/when.js",
-		    "expect": "lib/expect.js",
-		    "_": "lib/underscore.js",
-		    "robot": "robot.js",
-		    "util": "util.js",
-		    'spy': 'spy.js'
-		}
-	});
-
 	seajs.use(['spy', 'util', '_','jquery'], function(spy, util,  _){
 
 		var func = spy(function func1(a, b){

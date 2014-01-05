@@ -55,24 +55,26 @@
          函数调用的参数， 结果， 时间， 上下文情况，
         watch: function() {
                 //--对函数调用的观察
-                watch('OnFillUserName', function(callShot) {
+                this.watch('OnFillUserName', function(callShot) {
                     // assertStuff;
                 });
-                watch('OnFillPassword', function(callShot) {
+                this.watch('OnFillPassword', function(callShot) {
                     // assertStuff
                 });
-                watch('clickLogin', function(callShot) {
+                this.watch('clickLogin', function(callShot) {
                     // assertStuff
                 });
-                watch('validate', function(callShot) {
+                this.watch('validate', function(callShot) {
                     // assertStuff
                 });
             });
         },
         //--模拟过程结束过后观察函数的调用情况
         final: function(){
-                spy.called('OnFillUserName, clickLogin, validate');
-                spy('validate').shouldCallAfter('clickLogin');
+                this.called('OnFillUserName, clickLogin, validate');
+                this.spy('validate').shouldCallAfter('clickLogin');
         }
     });
 ```
+
+

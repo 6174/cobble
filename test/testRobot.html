@@ -3,6 +3,7 @@
 		<meta charset="uft-8">
 		<title>test robot</title>
 		<script src="../src/lib/sea.js"></script>
+		<script src="seajsConfig.js"></script>
 		<!-- // <script src="../src/qt.js"></script> -->
 	</head>
 <body>
@@ -21,32 +22,35 @@
 
 	<!-- all scripts  -->
 	<script>
-
-		seajs.config({
-			base: "../src/",
-			// 设置路径，方便跨目录调用
-            paths: {
-                'lib': 'lib',
-                'js': 'javascripts',
-                'css': 'stylesheets'
-            },
-
-			alias: {
-			    "jquery": "lib/jquery.js",
-			    "when": "lib/when.js",
-			    "robot": "robot.js",
-			    "util": "util.js"
-			}
-		});
-
-		seajs.use(['robot', 'when', 'jquery'], function(Robot, when){
+		seajs.use(['robot', 'asynTaskQueue', 'jquery'], function(Robot, Task){
 			var btn = $('#TestBtn');
 			btn.on('click', function(){
 				console.log('click me');
 			});
 
-			Robot()
-			.wait(1)
+			// var task = new Task();
+			// task.push(function(defer){
+			// 	console.log(arguments);
+			// 	setTimeout(function(){
+			// 		console.log('task 1');
+			// 		defer.resolve();
+			// 	}, 1000)
+			// 	return defer.promise;
+			// });
+
+			// task.push(function(defer){
+			// 	setTimeout(function(){
+			// 		console.log('task 2');
+			// 		defer.resolve();
+			// 	}, 1000)
+			// 	return defer.promise;
+			// });
+			// window.task = task;
+
+
+			var robot = Robot();
+			console.log(robot);
+			robot.wait(1)
 			.then(function(){
 				console.log('first then');
 			})
@@ -55,6 +59,7 @@
 			.click('#TestBtn')
 			.wait(1) 
 			.click('#TestBtn');
+
 			// Robot()
 			// .wait(3)
 			// ._then(function(){
