@@ -199,7 +199,19 @@ define(function(require, exports, module) {
 				return this;
 			}
 		};
-	}
+	};
+
+	//--array extend
+	mix(util, {
+		arrRemove: function arrRemove(arr, item) {
+			var index  = arr.indexOf(item);
+			if(index >= 0){
+				arr.splice(index, 1);
+			} 
+		}
+	});
+
+
 
 	module.exports = util;
 });

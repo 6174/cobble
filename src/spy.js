@@ -109,10 +109,15 @@ define(function(require, exports, module) {
 				args: args,
 				result: result,
 				stack: (new Error('-_-')).stack,
-				thisValue: this
+				thisValue: this,
+				thisFunc: thisFunc
 			}
 			thisFunc.incrementCallCount();
 			spy.fire('call-' + thisFunc.fullname, thisFunc._callShot);
+			spy.fire('call', {
+				funcId: thisFunc.fullname,
+				callShot: thisFunc._callShot
+			});
 			return result;
 		});
 
@@ -160,6 +165,5 @@ define(function(require, exports, module) {
 	function getFuncName(func) {
 		return util.functionName(func);
 	}
-
 	module.exports = spy;
 });
