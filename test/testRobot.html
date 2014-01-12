@@ -28,21 +28,24 @@
 				console.log('click me');
 			});
 
-			// var task = new Task();
-			// task.push(function(defer){
-			// 	setTimeout(function(){
-			// 		console.log('task 1');
-			// 		defer.resolve();
-			// 	}, 1000)
-			// });
+			var task = new Task(true);
+			task.push(function(defer){
+				setTimeout(function(){
+					console.log('task 1');
+					defer.resolve();
+				}, 1000)
+			});
 
-			// task.push(function(defer){
-			// 	setTimeout(function(){
-			// 		console.log('task 2');
-			// 		defer.resolve();
-			// 	}, 1000)
-			// });
+			task.push(function(defer){
+				setTimeout(function(){
+					console.log('task 2');
+					defer.resolve();
+				}, 1000)
+			});
 
+			// setTimeout(function(){
+			// 	task.run();
+			// }, 1000);
 
 			var robot = Robot();
 			robot

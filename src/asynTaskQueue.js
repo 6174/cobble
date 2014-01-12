@@ -8,8 +8,12 @@ define(function(require, exports, module){
 	var Promise = asyn.Promise;
 	var Defer = asyn.Defer;
 
-	function AsynTaskQueue(){
-		this.promise = Promise();
+	function AsynTaskQueue(isNeedRunAtInitial){
+		this.defer = new Defer();
+		this.promise = this.defer.promise;
+		if(isNeedRunAtInitial){
+			this.run();
+		}
 	}
 
 	util.mix(AsynTaskQueue.prototype, {
@@ -17,6 +21,9 @@ define(function(require, exports, module){
 			task = wrapTask(task);
 			this.promise = this.promise.then(task);
 			return this;
+		},
+		run: function(){
+			this.defer.resolve();
 		}
 	});
 

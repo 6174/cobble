@@ -46,6 +46,12 @@ define(function(require, exports, module) {
 		registTestSuit(testSuitConfig);
 	}
 
+	util.mix(Cobble, {
+		startTest: function(){
+			cobbleTask.run();
+		}
+	});
+
 	function initialTestSuit(testSuitConfig){
 		switch(testSuitConfig.type){
 			case TEST_SUIT_TYPE['syn']: 
@@ -99,6 +105,6 @@ define(function(require, exports, module) {
 	function registTestSuit(testSuitConfig){
 		cobbleTask.push(testSuitConfig._run);
 	}
-	
+
 	module.exports = Cobble;
 });

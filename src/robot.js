@@ -21,7 +21,7 @@ define(function(require, exports, module) {
 		if(!(this instanceof Robot)){
 			return new Robot();
 		}
-		this.task = new Task;
+		this.task = new Task(true);
 	}
 	var RobotProto = Robot.prototype;
 	/**
