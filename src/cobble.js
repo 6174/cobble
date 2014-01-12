@@ -66,7 +66,8 @@ define(function(require, exports, module) {
 	function initialSynTestSuit(testSuitConfig){
 		util.mix(testSuitConfig, {
 			_run: function(cobbleTaskDefer){
-				_.isFunction(this.action) && this.action(); 
+				_.isFunction(this.action) && this.action();
+				_.isFunction(this.finish) && this.finish(); 
 				cobbleTaskDefer.resolve();
 			}
 		})

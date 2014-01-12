@@ -22,3 +22,11 @@
     });  
 ```
 这种方式类似Qunit的测试，jasmine太趋向于BDD， expect不适用于驱动开发 ， 所以也是通过assert进行测试specs的编写  
+
+
+###spy的设计
+* 对每一个testSuit，其实只是负责获取spy监控到的函数情报， 并对这些情报assert。 
+* 函数监控其实是在其他地方已经完成了的， 这就是需要后台编译部分的原因， 直接将函数代码转为有spy语句的函数。
+* spy也可以在任何其他地方手动调用， 可以spy一个函数， 或者一个对象。 
+* IntelligenceAgency模块分为 intelligence， spy， intelligencer三个模块， 分别代表情报， 间谍， 情报员 
+* 对于一个testSuit，需要一个情报员， 报告和监控已经被spy过后的函数情况， 这个情报员的在任时间为这个异步testSuit的执行时间， 这里就相当于一个pubsub模型，在任期间可以监听函数的情况， 非在任期间取消监听权限。     
