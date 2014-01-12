@@ -33,7 +33,6 @@ define(function(require, exports, module) {
 			setTimeout(function() {
 				defer.resolve();
 			}, time ? time * 1000 : 10);
-			return defer.promise;
 		});
 		return this;
 	}
@@ -47,7 +46,6 @@ define(function(require, exports, module) {
 			setTimeout(function(){
 				defer.resolve();
 			}, time ? time * 1000 : 10)
-			return defer.promise;
 		});
 		return this;
 	}
@@ -60,13 +58,15 @@ define(function(require, exports, module) {
 			setTimeout(function() {
 				defer.resolve();
 			}, seconds * 1000);
-			return defer.promise;
 		});
 		return this;
 	}
 
 	RobotProto.then = function(func){
-		this.task.push(func);
+		this.task.push(function(defer){
+			func();
+			defer.resolve();
+		});
 		return this;
 	}
 

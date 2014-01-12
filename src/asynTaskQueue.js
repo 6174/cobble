@@ -15,14 +15,16 @@ define(function(require, exports, module){
 	util.mix(AsynTaskQueue.prototype, {
 		push: function (task){
 			task = wrapTask(task);
-			return this.promise = this.promise.then(task);
+			this.promise = this.promise.then(task);
+			return this;
 		}
 	});
 
 	function wrapTask(task){
 		var defer = new Defer();
 		return function(){
-			return task.call(this, defer);
+			task.call(this, defer);
+			return defer.promise; 
 		}
 	}
 	module.exports = AsynTaskQueue;
