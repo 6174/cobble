@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="uft-8">
+	<title>test spy</title>
+	<script src="../src/lib/sea.js"></script>
+	<script src="seajsConfig.js"></script>
+	<!-- // <script src="../src/qt.js"></script> -->
+</head>
+<body>
+<script type="text/javascript">
+	 
+	seajs.use(['cobble', 'jquery'], function(cobble){
+		cobble("test suit name", function(){
+			log(this);
+			log('this is a test suit action');
+		});
+
+		cobble("test equal func", {
+			action: function(robot){
+				robot
+				.wait(1)
+				.then(function(){
+					console.log('first then');
+				})
+				.wait(1)
+				.then(function(){
+					console.log('second then');
+				})
+				.done();
+			},
+			finish: function(){
+				this.assert.equal(1, 1, '1 等于 1');
+				log('finish equal test');
+			}
+		});
+
+		cobble.startTest();
+	});
+
+	function log(info){
+		console.log(info);
+	}
+</script>
+</body>
+</html>>
