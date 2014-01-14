@@ -10,6 +10,8 @@
     * click(position)
 
 ### spy函数监控模型 
+* spy 的细化工作
+    * spy 提供spy工厂, 提供单独的
 
 ### test case语法
 
