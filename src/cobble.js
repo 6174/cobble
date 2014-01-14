@@ -8,7 +8,9 @@ define(function(require, exports, module) {
 	var asyn = require('asyn');
 	var assert = require('assert');
 	var util = require('util');
+	var IA = require('IA');
 	var _ = require('_');
+	var pattern = require('matches').pattern;
 	var spy = require('spy');
 	var Robot = require('robot');
 	var AsynTaskQueue = require('asyntaskQueue');
@@ -16,8 +18,9 @@ define(function(require, exports, module) {
 	var Defer = asyn.Defer;
 
 
-	//--test suit的类型， 传统的类型是同步的syn
-	//--需要robot异步执行的， 那么类型就是异步的asyn
+	//--test suit的类型
+	//--syn:  传统的同步类型
+	//--asyn: 需要robot异步执行的， 那么类型就是异步的
 	var TEST_SUIT_TYPE = {
 		'syn': 1,
 		'asyn': 2
@@ -66,7 +69,16 @@ define(function(require, exports, module) {
 		}
 	}
 	function decorateTestSuit(testSuitConfig){
-		testSuitConfig.assert = assert;
+		var self = testSuitConfig;
+		util.mix(testSuitConfig, {
+			assert: assert,
+			robot: new Robot,
+			pattern: pattern,
+			intelligencer: IA.appointAnIntelligencer(),
+			watch: function(funcId, handler){
+				self.intelligencer.watch(funcId, _.bind(handler, self));
+			},
+		});
 	}
 
 	function initialSynTestSuit(testSuitConfig){
@@ -74,7 +86,6 @@ define(function(require, exports, module) {
 		util.mix(testSuitConfig, {
 			_run: function(cobbleTaskDefer){
 				_.isFunction(self.action) && self.action();
-				_.isFunction(self.finish) && self.finish(); 
 				cobbleTaskDefer.resolve();
 			}
 		});
@@ -83,14 +94,18 @@ define(function(require, exports, module) {
 	function initialAsynTestSuit(testSuitConfig){
 		var self = testSuitConfig;
 		util.mix(testSuitConfig, {
-			robot: new Robot,
-			spy: spy,
 			_run: function(cobbleTaskDefer){
 				var taskQueue = new AsynTaskQueue;
+				taskQueue.push(runSpy);
 				taskQueue.push(runAction);
-				taskQueue.push(runWatch);
 				taskQueue.push(runFinal);
 				taskQueue.run();
+
+				function runSpy(defer){
+					_.isFunction(self.spy) && self.spy();
+					defer.resolve();
+				}
+
 				function runAction(defer){
 					self.robot.done = function(){
 						this.task.push(function(robotDefer){
@@ -100,11 +115,6 @@ define(function(require, exports, module) {
 						return this;
 					}
 					_.isFunction(self.action) && self.action(self.robot);
-				}
-
-				function runWatch(defer){
-					_.isFunction(self.watch) && self.watch(self.spy)
-					defer.resolve();
 				}
 
 				function runFinal(defer){

@@ -50,7 +50,7 @@ define(function(require, exports, module){
 					funcId: funcId,
 					callShot: ev
 				});
-				handler(callShot);
+				handler(ev);
 			});
 		},
 		getCallSequece: function(){

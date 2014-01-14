@@ -12,6 +12,7 @@ seajs.config({
 		"when": "lib/when.js",
 		"expect": "lib/expect.js",
 		"_": "lib/underscore.js",
+		"matches": "lib/matches.js",
 		"robot": "robot.js",
 		"cobble": "cobble.js",
 		'assert': 'assert.js',

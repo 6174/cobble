@@ -71,6 +71,7 @@ define(function(require, exports, module) {
 
 		parent[name] = func;
 		functionHashTable[fullname] = func;
+		func.fullname = fullname;
 		return func;
 	}
 
