@@ -6,10 +6,11 @@
  */
 define(function(require, exports, module) {
 	var asyn = require('asyn');
+	var assert = require('assert');
 	var util = require('util');
 	var _ = require('_');
 	var spy = require('spy');
-	var robot = require('robot');
+	var Robot = require('robot');
 	var AsynTaskQueue = require('asyntaskQueue');
 	var Promise = asyn.Promise;
 	var Defer = asyn.Defer;
@@ -44,6 +45,7 @@ define(function(require, exports, module) {
 		testSuitConfig.name = testSuitName;
 		initialTestSuit(testSuitConfig);
 		registTestSuit(testSuitConfig);
+		return testSuitConfig;
 	}
 
 	util.mix(Cobble, {
@@ -53,6 +55,7 @@ define(function(require, exports, module) {
 	});
 
 	function initialTestSuit(testSuitConfig){
+		decorateTestSuit(testSuitConfig);
 		switch(testSuitConfig.type){
 			case TEST_SUIT_TYPE['syn']: 
 				initialSynTestSuit(testSuitConfig);
@@ -62,18 +65,23 @@ define(function(require, exports, module) {
 				break;
 		}
 	}
+	function decorateTestSuit(testSuitConfig){
+		testSuitConfig.assert = assert;
+	}
 
 	function initialSynTestSuit(testSuitConfig){
+		var self = testSuitConfig;
 		util.mix(testSuitConfig, {
 			_run: function(cobbleTaskDefer){
-				_.isFunction(this.action) && this.action();
-				_.isFunction(this.finish) && this.finish(); 
+				_.isFunction(self.action) && self.action();
+				_.isFunction(self.finish) && self.finish(); 
 				cobbleTaskDefer.resolve();
 			}
-		})
+		});
 	}
 
 	function initialAsynTestSuit(testSuitConfig){
+		var self = testSuitConfig;
 		util.mix(testSuitConfig, {
 			robot: new Robot,
 			spy: spy,
@@ -82,20 +90,25 @@ define(function(require, exports, module) {
 				taskQueue.push(runAction);
 				taskQueue.push(runWatch);
 				taskQueue.push(runFinal);
+				taskQueue.run();
 				function runAction(defer){
-					this.robot.done = function(){
-						defer.resolve;
+					self.robot.done = function(){
+						this.task.push(function(robotDefer){
+							// robotDefer.resolve();
+							defer.resolve();
+						});
+						return this;
 					}
-					_.isFunction(this.action) && this.action(this.robot);
+					_.isFunction(self.action) && self.action(self.robot);
 				}
 
 				function runWatch(defer){
-					_.isFunction(this.watch) && this.watch(this.spy)
-					defer.resolve;
+					_.isFunction(self.watch) && self.watch(self.spy)
+					defer.resolve();
 				}
 
 				function runFinal(defer){
-					_.isFunction(this.finish) && this.finish();
+					_.isFunction(self.finish) && self.finish();
 					defer.resolve();
 					cobbleTaskDefer.resolve();
 				}
