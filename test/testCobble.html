@@ -33,7 +33,7 @@
 	 		spy: function() {
 	 			log('step:spy');
 	 			var self = this;
-	 			
+
 	 			self.watch('namespace.sum', function(callshot) {
 	 				var result = callshot.result; 
 	 				var func = self.pattern({
@@ -50,13 +50,15 @@
 	 		},
 	 		action: function() {
 	 			console.log('step:action');
-	 			this.robot.wait(1).then(function() {
+	 			this.robot
+	 			.wait(1).then(function() {
 	 				var sum = spy(function sum(a, b) {
 	 					return a + b;
 	 				}, 'namespace.');
 	 				sum(1, 2);
 	 				sum(2, 3);
-	 			}).wait(1).then(function() {
+	 			})
+	 			.wait(1).then(function() {
 	 				console.log('second then');
 	 			}).done();
 	 		},
