@@ -2,11 +2,10 @@
  * @module event dispatcher
  */
 define(function(require, exports, module) {
-	var $ = require('jquery');
 	var _ = require('_');
 
 	var EventSimulator = {};
-	var mouseEventArr = "click,mousedown,mouseup,mouseout,mouseover".split(',');
+	var mouseEventArr = "dblclick,click,mousedown,mouseup,mouseout,mouseover".split(',');
 	var htmlEventArr = "abort,blur,change,error,focus,load,reset,resize,scroll,select".split(',');
 	var keyEvetArr = "keyup,keydown,keypress".split(',');
 

@@ -30,3 +30,7 @@
 * spy也可以在任何其他地方手动调用， 可以spy一个函数， 或者一个对象。 
 * IntelligenceAgency模块分为 intelligence， spy， intelligencer三个模块， 分别代表情报， 间谍， 情报员 
 * 对于一个testSuit，需要一个情报员， 报告和监控已经被spy过后的函数情况， 这个情报员的在任时间为这个异步testSuit的执行时间， 这里就相当于一个pubsub模型，在任期间可以监听函数的情况， 非在任期间取消监听权限。     
+
+###robot simulate设计  
+* 准备使用jquery的simulate.js，simulate.js已经有了基本的鼠标事件和键盘事件， 但是接口还是不完善，需要在robot中重新实现接口。 其主要的方法都是针对鼠标键盘事件， 但是对于html事件需要另外触发   
+* 对于htmlEvent事件大多数jquery都已经有了，select, change

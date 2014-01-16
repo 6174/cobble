@@ -1,5 +1,5 @@
 /**
- * @desc:  Promise, mock user ations
+ * @desc:  Promise, simulate user ations
  * @author: chenxuejia
  * @email: chenxuejia67@gmail.com
  * @usage:
@@ -24,25 +24,42 @@ define(function(require, exports, module) {
 		this.task = new Task(true);
 	}
 	var RobotProto = Robot.prototype;
-	/**
-	 * mock click
-	 */
-	RobotProto.click = function(id, time) {
+
+	RobotProto.click = function(id, options) {
 		this.task.push(function(defer) {
-			$(id).click();
+			$(id).simulate('click', options || findElementCenter(id));
 			setTimeout(function() {
 				defer.resolve();
-			}, time ? time * 1000 : 10);
+			}, 10);
 		});
 		return this;
 	}
 
-	/**
-	 * mock fill input filed
-	 */
-	RobotProto.input = function(id, value, time){
+	RobotProto.mouseover = function(id, options){
+		this.task.push(function(defer) {
+			$(id).simulate('mouseover', options || findElementCenter(id));
+			setTimeout(function() {
+				defer.resolve();
+			}, 10);
+		});
+		return this;
+	}
+
+	RobotProto.mouseout = function(id, options){
+		this.task.push(function(defer) {
+			$(id).simulate('mouseout', options || findElementCenter(id));
+			setTimeout(function() {
+				defer.resolve();
+			}, 10);
+		});
+		return this;
+	}
+
+
+	RobotProto.select = RobotProto.input = function(id, value, time){
 		this.task.push(function(defer) {
 			$(id).val(value);
+			$(id).change();
 			setTimeout(function(){
 				defer.resolve();
 			}, time ? time * 1000 : 10)
@@ -50,9 +67,6 @@ define(function(require, exports, module) {
 		return this;
 	}
 
-	/**
-	 * wait
-	 */
 	RobotProto.wait = function(seconds) {
 		this.task.push(function(defer) {
 			setTimeout(function() {
@@ -68,6 +82,16 @@ define(function(require, exports, module) {
 			defer.resolve();
 		});
 		return this;
+	}
+
+
+	function findElementCenter(el){
+		el = $(el);
+		var	o = el.offset();
+		return {
+			clientX : o.left + el.outerWidth() / 2,
+			clientY: o.top + el.outerHeight() / 2
+		};
 	}
 
 	module.exports =  Robot;

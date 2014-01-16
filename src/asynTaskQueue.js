@@ -1,6 +1,26 @@
-/**
+
+/** 
  * @desc: asyn task queue methods
- */
+ * 
+	// var task = new AsynTaskQueue();
+	// task.push(function(defer){
+	// 	setTimeout(function(){
+	// 		console.log('task 1');
+	// 		defer.resolve();
+	// 	}, 1000)
+	// });
+
+	// task.push(function(defer){
+	// 	setTimeout(function(){
+	// 		console.log('task 2');
+	// 		defer.resolve();
+	// 	}, 1000)
+	// });
+
+	// setTimeout(function(){
+	// 	task.run();
+	// }, 1000);
+*/
 define(function(require, exports, module){
 	var asyn = require('asyn');
 	var util = require('util');

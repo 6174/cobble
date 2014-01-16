@@ -17,59 +17,65 @@
 		<div class="inner">
 			<input  id="UserName" type="text" value="test"/>
 			<button id="TestBtn">hello cobble</button>
+			<br>
+			<select name="" id="UserType">
+				<option value="1" >student</option>
+				<option value="2">teacher</option>
+				<option value="3">worker</option>
+				<option value="4" selected="selected">farmer</option>
+			</select>
 		</div>
 	</div>
 
 	<!-- all scripts  -->
 	<script>
-		seajs.use(['robot', 'asynTaskQueue', 'jquery'], function(Robot, Task){
-			var btn = $('#TestBtn');
-			btn.on('click', function(){
-				console.log('click me');
+		seajs.use(['robot', 'asynTaskQueue', 'jquery', 'simulate'], function(Robot, Task){
+			seajs.use('simulate', function(){
+				var btn = $('#TestBtn');
+				var userName = $('#UserName');
+
+				btn[0].addEventListener('click', function(){
+					console.log('click btn');
+				});
+
+				btn[0].addEventListener('mouseover', function(ev){
+					btn.css('font-weight', 'bold');
+				});
+
+				btn[0].addEventListener('mouseout', function(ev){
+					btn.css('font-weight', '100');
+				});
+
+				userName.bind('change', function(ev){
+					console.log('change input  value');
+				});
+
+				$('#UserType').bind('change', function(ev){
+					console.log('change select value');
+				});
+
+
+
+
+
+				var robot = Robot();
+				robot
+				.wait(1)
+				.then(function(){
+					// console.log('thennable');
+				})
+				.mouseover('#TestBtn')
+				.wait(1)
+				.mouseout('#TestBtn')
+				.wait(1)
+				.select('#UserType', 2)
+				.wait(1)
+				.select('#UserType', 3)
+				.wait(1)
+				.input('#UserName', 'haha I am xuejia!')
+				.wait(1)
+				.click('#TestBtn')
 			});
-
-			var task = new Task(true);
-			task.push(function(defer){
-				setTimeout(function(){
-					console.log('task 1');
-					defer.resolve();
-				}, 1000)
-			});
-
-			task.push(function(defer){
-				setTimeout(function(){
-					console.log('task 2');
-					defer.resolve();
-				}, 1000)
-			});
-
-			// setTimeout(function(){
-			// 	task.run();
-			// }, 1000);
-
-			var robot = Robot();
-			robot
-			.wait(1)
-			.then(function(){
-				console.log('first then');
-			})
-			.wait(1)
-			.then(function(){
-				console.log('second then');
-			})
-			.input('#UserName', 'haha I am xuejia!')
-			.wait(2)
-			.click('#TestBtn')
-			.wait(1) 
-			.click('#TestBtn');
-
-			// Robot()
-			// .wait(3)
-			// ._then(function(){
-			// 	console.log('I am the next robot')
-			// })
-			// .wait(1)
-			// .click('#TestBtn');
 		});
 
 	</script>
