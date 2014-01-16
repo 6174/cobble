@@ -19,4 +19,5 @@
 * mouseDown(x, y);  
 * mouseMoveTo(x, y);
 * mouseMoveBy(x, y);
-* mouseUp(x, y);
+* mouseUp(x, y)   
+* 增加dom expect 包括结构属性和样式的assert 

@@ -17,8 +17,8 @@ define(function(require, exports, module) {
 	var jquery = require('jquery');
 	var Task = require('asynTaskQueue');
 
-	function Robot(){
-		if(!(this instanceof Robot)){
+	function Robot() {
+		if (!(this instanceof Robot)) {
 			return new Robot();
 		}
 		this.task = new Task(true);
@@ -35,7 +35,7 @@ define(function(require, exports, module) {
 		return this;
 	}
 
-	RobotProto.mouseover = function(id, options){
+	RobotProto.mouseover = function(id, options) {
 		this.task.push(function(defer) {
 			$(id).simulate('mouseover', options || findElementCenter(id));
 			setTimeout(function() {
@@ -45,7 +45,7 @@ define(function(require, exports, module) {
 		return this;
 	}
 
-	RobotProto.mouseout = function(id, options){
+	RobotProto.mouseout = function(id, options) {
 		this.task.push(function(defer) {
 			$(id).simulate('mouseout', options || findElementCenter(id));
 			setTimeout(function() {
@@ -56,11 +56,11 @@ define(function(require, exports, module) {
 	}
 
 
-	RobotProto.select = RobotProto.input = function(id, value, time){
+	RobotProto.select = RobotProto.input = function(id, value, time) {
 		this.task.push(function(defer) {
 			$(id).val(value);
 			$(id).change();
-			setTimeout(function(){
+			setTimeout(function() {
 				defer.resolve();
 			}, time ? time * 1000 : 10)
 		});
@@ -76,8 +76,8 @@ define(function(require, exports, module) {
 		return this;
 	}
 
-	RobotProto.then = function(func){
-		this.task.push(function(defer){
+	RobotProto.then = function(func) {
+		this.task.push(function(defer) {
 			func();
 			defer.resolve();
 		});
@@ -85,14 +85,17 @@ define(function(require, exports, module) {
 	}
 
 
-	function findElementCenter(el){
-		el = $(el);
-		var	o = el.offset();
+	function findElementCenter(elem) {
+		var offset,
+			document = $(elem.ownerDocument);
+		elem = $(elem);
+		offset = elem.offset();
+
 		return {
-			clientX : o.left + el.outerWidth() / 2,
-			clientY: o.top + el.outerHeight() / 2
+			clientX: offset.left + elem.outerWidth() / 2 - document.scrollLeft(),
+			clientY: offset.top + elem.outerHeight() / 2 - document.scrollTop()
 		};
 	}
 
-	module.exports =  Robot;
+	module.exports = Robot;
 });
