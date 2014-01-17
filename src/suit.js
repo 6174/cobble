@@ -30,6 +30,7 @@ define(function(require, exports, module) {
 	//--这里通过testSuitTaskQueue来注册cobble里需要异步执行的动作
 	var testSuitTaskQueue = new AsynTaskQueue;
 	var currentSuit = null;
+
 	function Suit(arg1, arg2){
 		if(!util.isString(arg1)){
 			return;
@@ -45,26 +46,21 @@ define(function(require, exports, module) {
 			testSuitConfig = arg2;
 			testSuitConfig.type = TEST_SUIT_TYPE['asyn']; 
 		}
-		testSuitConfig.name = testSuitName;
-		testSuitConfig.id = suitId ++;
-		util.mix(this, testSuitConfig);
-		this._init();
+		this.name = testSuitName;
+		this._init(testSuitConfig);
 	}
 
 
-	util.mix(Suit, {
-		startTask: function(){
-			testSuitTaskQueue.run();
-		},
-		getCurrentSuit: function(){
-			return currentSuit;
-		}
-	});
-
 	util.mix(Suit.prototype, {
-		_init: function(){
+		_init: function(config){
 			var self = this;
 			currentSuit = this;
+			util.mix(self, config);
+
+			this.id = suitId ++;
+			this.specs = [];
+
+			//-- decorates
 			util.mix(self, {
 				robot: new Robot,
 				intelligencer: IA.appointAnIntelligencer(),
@@ -72,6 +68,8 @@ define(function(require, exports, module) {
 					self.intelligencer.watch(funcId, util.proxy(handler, self));
 				}
 			});
+
+			//-- strategy
 			switch(self.type){
 				case TEST_SUIT_TYPE['syn']: 
 					initialSynTestSuit(this);
@@ -83,7 +81,32 @@ define(function(require, exports, module) {
 			registTestSuitTask(this._run);
 		},
 		createSpec: function(description, handler){
+			var spec = new Spec({
+					description: description,
+					fn: handler,
+					suit: this
+				});
 
+			spec.on('failed', function(e){
+				console.log('Failed suit:' + e.spec.suit.name + ', spec:' + e.spec.description + ' ' + e.message);
+			});
+
+			spec.on('passed', function(){
+				console.log('passed suit:' + spec.suit.name + ', spec' + spec.description);
+			});
+
+			this.specs.push(spec);
+			spec.execute();
+		}
+	});
+
+
+	util.mix(Suit, {
+		startTask: function(){
+			testSuitTaskQueue.run();
+		},
+		getCurrentSuit: function(){
+			return currentSuit;
 		}
 	});
 

@@ -4,8 +4,11 @@
 define(function(require, exports, module){
 	var util = require('util');
 
+	var specId = 0;
+
 	function Spec(config){
 		util.mix(this, util.getEventHub());
+		this.id = specId ++;
 		this.fn = config.fn;
 		this.suit = config.suit;
 		this.description = config.description;
@@ -14,18 +17,29 @@ define(function(require, exports, module){
 	}
 
 	util.mix(Spec.prototype, {
-		addExpectation: function (e){
-			this.failedExpectations.push()
+		handleException: function (e){
+			e.spec = this;
+			this.failedExpectations.push(e);
 		},
 		execute: function (){
 			var self = this;
-			self.fire('start');
 			try{
-				fn();
+				this.fn();
 			}catch(e){
-				self.addExpectation(e);
+				this.handleException(e);
 			}
-			self.fire('end');
+			this.judge();
+		},
+		judge: function(){
+			var status = this.getStatus();
+			if(status === 'failed'){
+				this.fire('failed', this.failedExpectations[0]);
+			} else {
+				this.fire('passed');
+			}
+		},
+		getStatus: function (){
+			return this.failedExpectations.length > 0 ? 'failed' : 'passed';
 		}
 	});
 	module.exports = Spec;

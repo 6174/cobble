@@ -20,7 +20,15 @@
 	 	 */
 	 	cobble.describe("test suit name", function() {
 	 		// log(this);
-	 		log('this is a test suit action');
+	 		cobble.it('a test spec', function(){
+ 				expect({ a: 'b' }).to.eql({ a: 'd' });
+ 				expect({ a: 'b' }).to.eql({ a: 'c' });
+ 			});
+
+ 			cobble.it('a test spec', function(){
+ 				expect(true).to.eql(true);
+ 			});
+
 	 	});
 
 	 	/**
@@ -32,7 +40,6 @@
 	 		spy: function() {
 	 			log('step:spy');
 	 			var self = this;
-
 	 			self.watch('namespace.sum', function(callshot) {
 	 				var result = callshot.result; 
 	 				var func = cobble.pattern({
@@ -53,7 +60,7 @@
 	 		action: function() {
 	 			console.log('step:action');
 	 			this.robot
-	 			.wait(1).then(function() {
+	 			.then(function(){
 	 				var sum = spy(function sum(a, b) {
 	 					return a + b;
 	 				}, 'namespace.');
