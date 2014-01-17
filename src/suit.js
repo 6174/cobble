@@ -10,6 +10,8 @@ define(function(require, exports, module) {
 	var util = require('util');
 	var IA = require('IA');
 	var Robot = require('robot');
+	var Spec = require('spec');
+
 	var Promise = asyn.Promise;
 	var Defer = asyn.Defer;
 
@@ -21,6 +23,8 @@ define(function(require, exports, module) {
 		'syn': 1,
 		'asyn': 2
 	};
+
+	var suitId = 0;
 
 	//--cobble注册的test suit需要异步执行，
 	//--这里通过testSuitTaskQueue来注册cobble里需要异步执行的动作
@@ -42,11 +46,11 @@ define(function(require, exports, module) {
 			testSuitConfig.type = TEST_SUIT_TYPE['asyn']; 
 		}
 		testSuitConfig.name = testSuitName;
-		initialTestSuit(testSuitConfig);
-		registTestSuit(testSuitConfig);
+		testSuitConfig.id = suitId ++;
 		util.mix(this, testSuitConfig);
-		currentSuit = this;
+		this._init();
 	}
+
 
 	util.mix(Suit, {
 		startTask: function(){
@@ -57,32 +61,35 @@ define(function(require, exports, module) {
 		}
 	});
 
-	function initialTestSuit(testSuitConfig){
-		decorateTestSuit(testSuitConfig);
-		switch(testSuitConfig.type){
-			case TEST_SUIT_TYPE['syn']: 
-				initialSynTestSuit(testSuitConfig);
-				break;
-			case TEST_SUIT_TYPE['asyn']:
-				initialAsynTestSuit(testSuitConfig);
-				break;
+	util.mix(Suit.prototype, {
+		_init: function(){
+			var self = this;
+			currentSuit = this;
+			util.mix(self, {
+				robot: new Robot,
+				intelligencer: IA.appointAnIntelligencer(),
+				watch: function(funcId, handler){
+					self.intelligencer.watch(funcId, util.proxy(handler, self));
+				}
+			});
+			switch(self.type){
+				case TEST_SUIT_TYPE['syn']: 
+					initialSynTestSuit(this);
+					break;
+				case TEST_SUIT_TYPE['asyn']:
+					initialAsynTestSuit(this);
+					break;
+			}
+			registTestSuitTask(this._run);
+		},
+		createSpec: function(description, handler){
+
 		}
-	}
+	});
 
-	function decorateTestSuit(testSuitConfig){
-		var self = testSuitConfig;
-		util.mix(testSuitConfig, {
-			robot: new Robot,
-			intelligencer: IA.appointAnIntelligencer(),
-			watch: function(funcId, handler){
-				self.intelligencer.watch(funcId, util.proxy(handler, self));
-			},
-		});
-	}
-
-	function initialSynTestSuit(testSuitConfig){
-		var self = testSuitConfig;
-		util.mix(testSuitConfig, {
+	function initialSynTestSuit(testSuit){
+		var self = testSuit;
+		util.mix(testSuit, {
 			_run: function(testSuitTaskQueueDefer){
 				util.isFunction(self.action) && self.action();
 				testSuitTaskQueueDefer.resolve();
@@ -90,9 +97,9 @@ define(function(require, exports, module) {
 		});
 	}
 
-	function initialAsynTestSuit(testSuitConfig){
-		var self = testSuitConfig;
-		util.mix(testSuitConfig, {
+	function initialAsynTestSuit(testSuit){
+		var self = testSuit;
+		util.mix(testSuit, {
 			_run: function(testSuitTaskQueueDefer){
 				var taskQueue = new AsynTaskQueue;
 				taskQueue.push(runSpy);
@@ -125,8 +132,8 @@ define(function(require, exports, module) {
 		});
 	}
 
-	function registTestSuit(testSuitConfig){
-		testSuitTaskQueue.push(testSuitConfig._run);
+	function registTestSuitTask(task){
+		testSuitTaskQueue.push(task);
 	}
 
 	module.exports = Suit;
