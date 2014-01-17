@@ -13,36 +13,38 @@
 	</head>
 	<body>
 		<script type="text/javascript">
-	seajs.use(['cobble', 'spy' , 'jquery'], function(cobble, spy) {
+	seajs.use(['cobble', 'spy', 'jquery'], function(cobble, spy) {
 	 	/**
 	 	 * @test
 	 	 * test cobble func context
 	 	 */
-	 	cobble("test suit name", function() {
-	 		log(this);
+	 	cobble.describe("test suit name", function() {
+	 		// log(this);
 	 		log('this is a test suit action');
 	 	});
-
 
 	 	/**
 	 	 * @test
 	 	 * test cobble func with action and spy
 	 	 */
 	 	window.spy = spy;
-	 	cobble("test equal func", {
+	 	cobble.describe("test equal func", {
 	 		spy: function() {
 	 			log('step:spy');
 	 			var self = this;
 
 	 			self.watch('namespace.sum', function(callshot) {
 	 				var result = callshot.result; 
-	 				var func = self.pattern({
+	 				var func = cobble.pattern({
 	 					'1, 2': function(){
 		 					log('matched');
-		 					self.assert.equal(result, 3, "1 + 2 = 3");
+		 					try{
+			 					expect({ a: 'b' }).to.eql({ a: 'a' });
+		 					} catch(e){
+		 						window.me = e;
+		 					}
 	 					},
 	 					'2, 3': function(){
-		 					self.assert.equal(result, 5, "2 + 3 = 5");
 	 					}
 	 				});
 	 				func.apply(self, callshot.args);
@@ -64,7 +66,6 @@
 	 		},
 	 		finish: function() {
 	 			log('step:finish');
-	 			this.assert.equal(1, 1, '1 等于 1');
 	 		}
 	 	});
 

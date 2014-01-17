@@ -1,0 +1,48 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>learn avalon</title>
+	<script src="../src/lib/avalon.js"></script>
+</head>
+<body>
+<div id="wrapper">
+	
+</div>
+<script>
+var template = hereDoc(function () {/*
+	<div ms-controller="box">
+	     <div style=" background: #a9ea00;" ms-css-width="w" ms-css-height="h"  ms-click="click"></div>
+	     <p>{{ w }} x {{ h }}</p>
+	     <p>W: <input type="text" ms-duplex="w" data-duplex-event="change"/></p>
+	     <p>H: <input type="text" ms-duplex="h" /></p>
+	</div>
+*/});
+testAvalon();
+
+function testAvalon(){
+	appendTemplace();
+	defineVm();
+}
+function appendTemplace(){
+	var wrapper = document.getElementById('wrapper');
+	wrapper.innerHTML = template;
+}
+
+function defineVm(){
+	avalon.define("box", function(vm) {
+         vm.w = 100;
+         vm.h = 100;
+         vm.click = function() {
+             vm.w = parseFloat(vm.w) + 10;
+             vm.h = parseFloat(vm.h) + 10;
+         }
+    })
+}
+
+function hereDoc(f) {　
+    return f.toString().replace(/^[^\/]+\/\*!?\s?/, '').replace(/\*\/[^\/]+$/, '');
+}
+console.log(template)
+</script>	
+</body>
+</html>

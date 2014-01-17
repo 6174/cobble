@@ -19,7 +19,7 @@ define(function(require, exports, module) {
 		}
 	}
 
-	util.proxy = function(context, func) {
+	util.proxy = function(func, context) {
 		return function() {
 			func.apply(context, arguments);
 		}
@@ -42,6 +42,10 @@ define(function(require, exports, module) {
 		}
 	};
 
+	util.heredoc = function(f) {　
+	    return f.toString().replace(/^[^\/]+\/\*!?\s?/, '').replace(/\*\/[^\/]+$/, '');
+	}
+	
 	util.create = function(o) {
 		function F() {};
 		F.prototype = o;
@@ -123,13 +127,22 @@ define(function(require, exports, module) {
 
 			return success;
 		},
-		isElement: function isElement(obj) {
+		isElement: function (obj) {
 			return div && obj && obj.nodeType === 1 && isDOMNode(obj);
 		},
-		isFunction: function isFunction(obj) {
+		isFunction: function (obj) {
 			return typeof obj === "function" || !! (obj && obj.constructor && obj.call && obj.apply);
 		},
-		functionName: function functionName(func) {
+		isString: function (obj) {
+			return this.isA(obj, 'string');
+		},
+		isNumber: function (obj){
+			return this.isA(obj, 'number');
+		},
+		isA: function (obj, type) {
+			return this.typeOf(obj) === type;
+		},
+		functionName: function (func) {
 			var name = func.displayName || func.name;
 			if (!name) {
 				var matches = func.toString().match(/function ([^\s\(]+)/);

@@ -11,15 +11,17 @@ seajs.config({
 		"jquery": "lib/jquery.js",
 		"matches": "lib/matches.js",
 		"simulate": "lib/jquery.simulate.js",
+		"expect": "lib/expect.js",
 		"_": "lib/underscore.js",
 		"robot": "robot.js",
-		"cobble": "cobble.js",
-		'assert': 'assert.js',
 		'asyn': 'asyn.js',
 		'asynTaskQueue': 'asynTaskQueue.js',
 		"IA": "IA.js",
 		"reporter": "reporter.js",
 		"util": "util.js",
 		'spy': 'spy.js',
+		"spec": "spec.js",
+		"suit": "suit.js",
+		"cobble": "cobble.js"
 	}
 });
