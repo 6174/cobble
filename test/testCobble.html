@@ -19,7 +19,7 @@
 	 	 * test cobble func context
 	 	 */
 	 	cobble.describe("test suit name", function() {
-	 		// log(this);
+
 	 		cobble.it('a test spec', function(){
  				expect({ a: 'b' }).to.eql({ a: 'd' });
  				expect({ a: 'b' }).to.eql({ a: 'c' });
@@ -28,7 +28,6 @@
  			cobble.it('a test spec', function(){
  				expect(true).to.eql(true);
  			});
-
 	 	});
 
 	 	/**
@@ -38,28 +37,23 @@
 	 	window.spy = spy;
 	 	cobble.describe("test equal func", {
 	 		spy: function() {
-	 			log('step:spy');
-	 			var self = this;
-	 			self.watch('namespace.sum', function(callshot) {
-	 				var result = callshot.result; 
-	 				var func = cobble.pattern({
-	 					'1, 2': function(){
-		 					log('matched');
-		 					try{
-			 					expect({ a: 'b' }).to.eql({ a: 'a' });
-		 					} catch(e){
-		 						window.me = e;
-		 					}
-	 					},
-	 					'2, 3': function(){
-	 					}
-	 				});
-	 				func.apply(self, callshot.args);
+	 			this.watch('namespace.sum', {
+	 				'1, 2': function(){
+	 					cobble.it('1 + 2 should be 3', function(){
+		 					expect(this.result).to.eql(4);
+	 					});
+	 				},
+	 				'2, 3': function(){
+	 					cobble.it('2 + 3 should be 5', function(){
+	 						expect(this.result).to.eql(5);
+	 					});
+	 				}
 	 			});
 	 		},
 	 		action: function() {
-	 			console.log('step:action');
-	 			this.robot
+	 			var self = this;
+	 			self.robot
+	 			.wait(1)
 	 			.then(function(){
 	 				var sum = spy(function sum(a, b) {
 	 					return a + b;
@@ -67,12 +61,12 @@
 	 				sum(1, 2);
 	 				sum(2, 3);
 	 			})
-	 			.wait(1).then(function() {
-	 				console.log('second then');
+	 			.wait(1)
+	 			.then(function() {
+	 				cobble.it('sum should called three times', function(){
+	 					expect(cobble.spy('namespace.sum').calledTwice()).to.be.ok();
+	 				});
 	 			}).done();
-	 		},
-	 		finish: function() {
-	 			log('step:finish');
 	 		}
 	 	});
 

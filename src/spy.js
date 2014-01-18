@@ -29,6 +29,8 @@ define(function(require, exports, module) {
 			ret = spyAFunc(arg1, namespace? namespace + name : name, name);
 		}else if(type == 'object'){
 			ret = spyAObject(arg1, '');
+		}else if(type == 'string'){
+			return functionHashTable[arg1];
 		}
 		return ret;
 	}

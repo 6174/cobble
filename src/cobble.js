@@ -14,7 +14,13 @@ define(function(require, exports, module) {
 	var Cobble = {
 		expect: expect,
 		pattern: pattern, 
-		spy: spy,
+		spy: function(arg1, arg2){
+			if(util.isString(arg1) && !arg2){
+				return Suit.getCurrentSuit().getSpyApi(arg1);
+			} else{
+				return spy(arg1, arg2);
+			}
+		},
 		startTest: function(){
 			Suit.startTask();
 		},

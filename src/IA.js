@@ -39,7 +39,10 @@ define(function(require, exports, module){
 	 * 在一个testSuit内watch的函数的执行情况都可以通过interlligencer来获取
 	 */
 	function Intelligencer(){
+		//--保存调用顺序
 		this.calls = [];
+		//--方便获取
+		this.hashedCalls = {};
 		util.mix(this, util.getEventHub());
 	}
 
@@ -47,20 +50,56 @@ define(function(require, exports, module){
 		watch: function(funcId, handler){
 			this.on(funcId, function(ev){
 				this.calls.push({
-					funcId: funcId,
-					callShot: ev
+					id: funcId,
+					call: ev
 				});
+				this.hashedCalls[funcId] = this.hashedCalls[funcId] || new SpyApi(funcId);
+				this.hashedCalls[funcId].push(ev);
 				handler(ev);
 			});
 		},
+		//--stuff about function-calls api 
 		getCallSequece: function(){
 			var ret = '';
 			_.forEach(this.calls, function(aCall){
 				ret += aCall.funcId;
 			});
 			return ret;
+		},
+		getSpyApi: function(funcId){
+			return this.hashedCalls[funcId];
 		}
-		//--stuff about function-calls api 
+	});
+
+	function SpyApi(funcId){
+		this.id = funcId;
+		this.calls = [];
+	}
+	util.mix(SpyApi.prototype, {
+		push: function(call){
+			this.calls.push(call);
+		},
+		getCallCount: function(){
+			return  this.calls.length;
+		},
+		called: function(){
+			return this.calls.length > 0;
+		},
+		calledOnce: function() {
+			return this.calls.length === 1;
+		},
+		calledTwice: function() {
+			return this.calls.length === 2;
+		},
+		calledThirce: function() {
+			return this.calls.length === 3;
+		},
+		getCallAt: function(index){
+			return this.calls[index];
+		},
+		getFirstCall: function(){
+			return this.calls[0];
+		}
 	});
 	module.exports = IntelligencyAgency; 
 });
