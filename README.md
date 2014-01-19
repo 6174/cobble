@@ -50,36 +50,37 @@ cobble的目的就是为了实现一个**介于ATDD和TDD**的以驱动逻辑代
 以一个登陆测试为例子   
 
 ```javascript  
-    cobble.describe({ 
+    
+    //--暴露describe， it, watch, spy, expect等方法到全局
+    cobble.expose();
+
+    //--测试集书写
+    describe('login test', function() {
         //--对模拟过程中的函数进行观察， 并通过callShot可以查看
          函数调用的参数， 结果， 时间， 上下文情况，
-        spy: function() {
-                //--对函数调用的观察
-                this.watch('OnFillUserName', function(ev) {
-                    it('OnFillUserName should call with string', function(){
-                        expect(ev.args[0]).to.be.a('string');
-                    });
-                    it('OnFillUserName should return a boolean', function(){
-                        expect(ev.result).to.be.a('boolean');
-                    });
-                });
+        //--对函数调用的观察
+        watch('OnFillUserName', function(ev) {
+            it('OnFillUserName should call with string', function(){
+                expect(ev.args[0]).to.be.a('string');
             });
-        },
+            it('OnFillUserName should return a boolean', function(){
+                expect(ev.result).to.be.a('boolean');
+            });
+        });
+
         //--mock 的用户行为， 目前在test/testRobot.html下面已经可以看到使用场景了, 使用promise A+模型极大的简化了异步行为的编写， 目前只有简单的click input wait方法 
-        action: function() {
-                this.robot.
-                .input('#UserName', '6174')
-                .wait(1)
-                .then(function(){
-                    it('should called OnFillUserName', function(){
-                        expect(spy('OnFillUserName').called()).to.be.ok();
-                    });
-                })
-                .input('#Password', '131420')
-                .wait(1)
-                .click('#Login')
-                .done();
-        },
+        robot().
+        .input('#UserName', '6174')
+        .wait(1)
+        .then(function(){
+            it('should called OnFillUserName', function(){
+                expect(spy('OnFillUserName').called()).to.be.ok();
+            });
+        })
+        .input('#Password', '131420')
+        .wait(1)
+        .click('#Login')
+        .done();
     });
 
 ```  
