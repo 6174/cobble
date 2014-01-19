@@ -67,7 +67,11 @@ define(function(require, exports, module){
 			return ret;
 		},
 		getSpyApi: function(funcId){
-			return this.hashedCalls[funcId];
+			var ret = this.hashedCalls[funcId];
+			if(!ret){
+				throw new Error('did not watch on ' + funcId);
+			}
+			return ret;
 		}
 	});
 

@@ -16,15 +16,6 @@ define(function(require, exports, module) {
 	var Promise = asyn.Promise;
 	var Defer = asyn.Defer;
 
-
-	//--test suit的类型
-	//--syn:  传统的同步类型
-	//--asyn: 需要robot异步执行的， 那么类型就是异步的
-	var TEST_SUIT_TYPE = {
-		'syn': 1,
-		'asyn': 2
-	};
-
 	var suitId = 0;
 
 	//--cobble注册的test suit需要异步执行，
@@ -32,146 +23,114 @@ define(function(require, exports, module) {
 	var testSuitTaskQueue = new AsynTaskQueue;
 	var currentSuit = null;
 
-	function Suit(arg1, arg2){
-		if(!util.isString(arg1)){
+	function Suit(arg1, arg2) {
+
+		if (!util.isString(arg1)) {
+			throw new Error('no test suit name');
 			return;
 		}
-		var testSuitName = arg1;
-		var testSuitConfig;
-		if(util.isFunction(arg2)){
-			testSuitConfig = {
-				type: TEST_SUIT_TYPE['syn'],
-				action: arg2
-			};
-		} else {
-			testSuitConfig = arg2;
-			testSuitConfig.type = TEST_SUIT_TYPE['asyn']; 
+
+		if (!util.isFunction(arg2)) {
+			throw new Error('no test suit handle function');
+			return;
 		}
-		this.name = testSuitName;
-		this._init(testSuitConfig);
+
+		this.id = suitId++;
+		this.name = arg1;
+		this.action = arg2;
+		this.specs = [];
+		this._init();
 	}
 
 
 	util.mix(Suit.prototype, {
-		_init: function(config){
+		_init: function() {
 			var self = this;
-			util.mix(self, config);
-
-			this.id = suitId ++;
-			this.specs = [];
-			this._decorate();
-			//-- strategy
-			switch(self.type){
-				case TEST_SUIT_TYPE['syn']: 
-					initialSynTestSuit(this);
-					break;
-				case TEST_SUIT_TYPE['asyn']:
-					initialAsynTestSuit(this);
-					break;
-			}
+			util.mix(self, util.getEventHub());
+			this._decorateWithExportsApi();
+			this._addRunHandler();
 			registTestSuitTask(this._run);
 		},
-		//--外部调用的接口
-		_decorate: function(){
-			var self = this;			
+		//--外部调用的接口, 在写测试集的受可以通过 this获取。
+		_decorateWithExportsApi: function() {
+			var self = this;
 			util.mix(self, {
 				robot: new Robot,
 				intelligencer: IA.appointAnIntelligencer(),
-				watch: function(funcId, patternConfig){
-					self.intelligencer.watch(funcId, util.proxy(function(callshot){
+				watch: function(funcId, patternConfig) {
+					self.intelligencer.watch(funcId, util.proxy(function(callshot) {
 						this.callshot = callshot;
 						this.result = callshot.result;
 						this.args = callshot.args;
 						var fn = pattern(patternConfig);
 						fn.apply(self, callshot.args);
 					}, self));
+				},
+				getSpyApi: function(funcId) {
+					return self.intelligencer.getSpyApi(funcId);
+				},
+				createSpec: function(description, handler) {
+					var spec = new Spec({
+						description: description,
+						fn: util.proxy(handler, this),
+						suit: this
+					});
+
+					spec.on('failed', function(e) {
+						var msg = '%c Failed suit:' + e.spec.suit.name + ', spec:' + e.spec.description + ' ' + e.message;
+						console.log(msg, "color:white; background-color:red");
+					});
+
+					spec.on('passed', function() {
+						var msg = '%c Passed suit:' + spec.suit.name + ', spec' + spec.description;
+						console.log(msg, "color:white; background-color:green");
+					});
+
+					self.specs.push(spec);
+					spec.execute();
 				}
 			});
 		},
-		getSpyApi: function(funcId){
-			return this.intelligencer.getSpyApi(funcId);
-		},
-		createSpec: function(description, handler){
-			var spec = new Spec({
-					description: description,
-					fn: util.proxy(handler, this),
-					suit: this
-				});
+		_addRunHandler: function() {
+			var self = this;
+			util.mix(self, {
+				_run: function(testSuitTaskQueueDefer) {
+					currentSuit = self;
 
-			spec.on('failed', function(e){
-				var msg = '%c Failed suit:' + e.spec.suit.name + ', spec:' + e.spec.description + ' ' + e.message; 
-				console.log(msg, "color:white; background-color:red");
+					self.done = function(){
+						testSuitTaskQueueDefer.resolve();
+					}
+
+					self.robot.done = function(){
+						this.task.push(function() {
+							testSuitTaskQueueDefer.resolve();
+						});
+					}
+
+					try{
+						util.isFunction(self.action) && self.action(self.robot);
+					}catch(e){
+						self.fire('suit-error', e);
+						throw(e);
+					}
+				}
 			});
-
-			spec.on('passed', function(){
-				var msg = '%c Passed suit:' + spec.suit.name + ', spec' + spec.description;
-				console.log(msg, "color:white; background-color:green");
-			});
-
-			this.specs.push(spec);
-			spec.execute();
-		},
-
+		}
 	});
 
 
+	//--static method
 	util.mix(Suit, {
-		startTask: function(){
+		startTask: function() {
 			testSuitTaskQueue.run();
 		},
-		getCurrentSuit: function(){
+		getCurrentSuit: function() {
 			return currentSuit;
 		}
 	});
 
-	function initialSynTestSuit(testSuit){
-		var self = testSuit;
-		util.mix(testSuit, {
-			_run: function(testSuitTaskQueueDefer){
-				currentSuit = testSuit;
-				util.isFunction(self.action) && self.action();
-				testSuitTaskQueueDefer.resolve();
-			}
-		});
-	}
 
-	function initialAsynTestSuit(testSuit){
-		var self = testSuit;
-		util.mix(testSuit, {
-			_run: function(testSuitTaskQueueDefer){
-				currentSuit = testSuit;
-				var taskQueue = new AsynTaskQueue;
-				taskQueue.push(runSpy);
-				taskQueue.push(runAction);
-				taskQueue.push(runFinal);
-				taskQueue.run();
-
-				function runSpy(defer){
-					util.isFunction(self.spy) && self.spy();
-					defer.resolve();
-				}
-
-				function runAction(defer){
-					self.robot.done = function(){
-						this.task.push(function(robotDefer){
-							// robotDefer.resolve();
-							defer.resolve();
-						});
-						return this;
-					}
-					util.isFunction(self.action) && self.action(self.robot);
-				}
-
-				function runFinal(defer){
-					util.isFunction(self.finish) && self.finish();
-					defer.resolve();
-					testSuitTaskQueueDefer.resolve();
-				}
-			}
-		});
-	}
-
-	function registTestSuitTask(task){
+	function registTestSuitTask(task) {
 		testSuitTaskQueue.push(task);
 	}
 

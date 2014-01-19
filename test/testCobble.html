@@ -14,45 +14,46 @@
 	<body>
 		<script type="text/javascript">
 	seajs.use(['cobble', 'spy', 'jquery'], function(cobble, spy) {
+		cobble.expose();
 	 	/**
 	 	 * @test
 	 	 * test cobble func context
 	 	 */
-	 	cobble.describe("test suit name", function() {
+	 	describe("test suit name", function() {
 
-	 		cobble.it('a test spec', function(){
+	 		it('a test spec', function(){
  				expect({ a: 'b' }).to.eql({ a: 'd' });
  				expect({ a: 'b' }).to.eql({ a: 'c' });
  			});
 
- 			cobble.it('a test spec', function(){
+ 			it('a test spec', function(){
  				expect(true).to.eql(true);
  			});
+
+ 			done();
 	 	});
 
 	 	/**
 	 	 * @test
 	 	 * test cobble func with action and spy
 	 	 */
-	 	window.spy = spy;
-	 	cobble.describe("test equal func", {
-	 		spy: function() {
-	 			this.watch('namespace.sum', {
+	 	describe("test equal func", function() {
+	 			var self = this;
+
+	 			watch('namespace.sum', {
 	 				'1, 2': function(){
-	 					cobble.it('1 + 2 should be 3', function(){
+	 					it('1 + 2 should be 3', function(){
 		 					expect(this.result).to.eql(4);
 	 					});
 	 				},
 	 				'2, 3': function(){
-	 					cobble.it('2 + 3 should be 5', function(){
+	 					it('2 + 3 should be 5', function(){
 	 						expect(this.result).to.eql(5);
 	 					});
 	 				}
 	 			});
-	 		},
-	 		action: function() {
-	 			var self = this;
-	 			self.robot
+
+	 			robot()
 	 			.wait(1)
 	 			.then(function(){
 	 				var sum = spy(function sum(a, b) {
@@ -63,11 +64,10 @@
 	 			})
 	 			.wait(1)
 	 			.then(function() {
-	 				cobble.it('sum should called three times', function(){
+	 				it('sum should called twice times', function(){
 	 					expect(cobble.spy('namespace.sum').calledTwice()).to.be.ok();
 	 				});
 	 			}).done();
-	 		}
 	 	});
 
 	 	cobble.startTest();

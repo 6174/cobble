@@ -29,6 +29,25 @@ define(function(require, exports, module) {
 		},
 		it: function(description, handler){
 			Suit.getCurrentSuit().createSpec(description, handler);
+		},
+		done: function(){
+			Suit.getCurrentSuit().done();
+		},
+		watch: function(arg1, arg2){
+			Suit.getCurrentSuit().watch(arg1, arg2);
+		},
+		robot: function(){
+			return Suit.getCurrentSuit().robot;
+		},
+		expose: function(){
+			util.mix(window, {
+				describe: this.describe,
+				spy: this.spy,
+				robot: this.robot,
+				watch: this.watch,
+				done: this.done,
+				it: this.it,
+			});
 		}
 	};
 	module.exports = Cobble;
