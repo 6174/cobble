@@ -97,6 +97,25 @@
 * read_stream.pipe(res);
 * 从child_process中pipe到res里边， var child = spawn('tail, ['-f', '/var/log/system.log']);  child.stdout.pipe(res); res.on('end', function(){child.kill()});
 
+##chapter 20 Middleware
+---
+* 当我们在创建一个http server的时候， 每次都会做这样一些事情， 解析header， 解析查询字符串， 维护一个session，logging。 我们不应该在写核心逻辑代码的时候出现这些东西， 这些事情应该由HTTP 服务逻辑完成
+* connect是一个node http 中间件 
+* var app = connect.createServer(middleware1, middleware2...); app.listen(..);
+* middleware example:
+ ```javascript 
+   //--writeHeader.js
+   function writeHeader(name, value){
+        return function (req, res, next){
+            res.setHeader(name, value);
+            //--promise
+            next();
+        }
+   }
+   module.exports = writeHeader;
+ ```
+
+
 
 
 
