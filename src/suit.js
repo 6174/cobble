@@ -51,7 +51,7 @@ define(function(require, exports, module) {
 			this._addRunHandler();
 			registTestSuitTask(this._run);
 		},
-		//--外部调用的接口, 在写测试集的受可以通过 this获取。
+		//--外部调用的接口, 在写测试集的时候可以通过 this获取。
 		_decorateWithExportsApi: function() {
 			var self = this;
 			util.mix(self, {

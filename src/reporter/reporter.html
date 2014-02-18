@@ -1,0 +1,67 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>cobble reporter</title>
+	<link rel="stylesheet" href="reporter.css">
+	<script src="reporter.js"></script>
+</head>
+<body>
+	<div id="CBReporter">
+		<div class="cb-header">
+			<span class="cb-logo">Cobble</span>
+			<span class="cb-test-suits-info">13 tests</span>
+		</div>
+		<div class="cb-menu">
+			<a href="#">spec list</a>
+			<a href="#">Failed</a>
+		</div>
+		<div class="cb-content">
+			<!-- a success test suit -->
+			<div class="cb-suit">
+
+				<div class="cb-test-header">
+					<span class="cb-suit-name">array extention</span>
+				</div>
+
+				<ul>
+					<!-- watch -->
+					<li class="cb-watch">
+						<div class="cb-watch-title-wrapper">
+							<span class="cb-watch-title"> #watch namespace.Array.remove </span>
+							<span class="cb-watch-invoke-time"> called <big>2</big> times;</span>
+						</div>
+						<!-- watch-invoke -->
+						<div class="cb-watch-invoke ">
+							<div class="cb-watch-invoke-info">args: 2, return: null, time: 0.</div> 
+							<div class="cb-spec">1. 索引位置大于数组长度</div>
+						</div>
+
+						<!-- watch-invoke -->
+						<div class="cb-watch-invoke">
+							<div class="cb-watch-invoke-info">args: 2, return: null, time: 0.</div> 
+							<div class="cb-spec">1. 索引位置大于数组长度应该返回1</div>
+						</div>
+					</li>
+					
+
+					<!-- test spec-->
+					<li>
+						<div class="cb-spec cb-success">spec: get an element of an array</div>
+					</li>
+
+
+				</ul>	
+			</div>
+
+			<!-- a failure -->
+			<div class="cb-test-suit">
+				
+			</div>
+
+		</div>
+		<div class="cb-footer">
+			
+		</div>
+	</div>
+</body>
+</html>
