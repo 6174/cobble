@@ -21,3 +21,17 @@
 * mouseMoveBy(x, y);
 * mouseUp(x, y)   
 * 增加dom expect 包括结构属性和样式的assert 
+
+### 2014.2.18 - 2014.2.22 proxy server
+* 为了重新编译源文件， 方便spy调用， 需要做一个代理服务器， 代理访问应用中的脚本文件并做一定的加工再返回。  
+* 重新复习professional nodejs， 熟悉http, https, ssl, child_precess  
+* 完成代理访问服务器 
+* 完成编译中间件   
+* 设计： 
+	- 目前参考spy-js的proxy设计 
+	- 使用到的node模块有： 
+   		`express`， `http-proxy`, `commander`  
+
+### 2014.2.23-2014.2.24 
+* 报道&选课   
+* 想好基于 phantomJS 还是selenium的webdriver做更完善的设计  
