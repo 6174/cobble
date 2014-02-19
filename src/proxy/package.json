@@ -18,7 +18,8 @@
     "http-proxy": "*",
     "underscore": "*",
     "request": "*",
-    "connect": "*"
+    "connect": "*",
+    "url": "*"
   },
   "author": "chenxuejia",
   "license": "BSD"

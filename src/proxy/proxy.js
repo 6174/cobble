@@ -1,11 +1,16 @@
 /**
  * cobble web proxy
  * @author: 6174
+ * 代理过程
+ * -> 浏览器请求js文件
+ * -> 浏览器代理请求到cobble proxy
+ * -> 解析url
+ * -> 如果不是js文件那么通过proxy.web访问
+ * -> 如果是js文件， 那么通过request来请求
+ * -> 将请求的js文件二次编译再返回
  */
 
-//**********
-//--requires
-//**********
+//--required vars
 var http = require('http');
 var https = require('https');
 var net = require('net');
@@ -14,40 +19,106 @@ var connect = require('connect');
 var httpProxy = require('http-proxy');
 var child_process = require('child_process');
 var path = require('path');
+var fs = require('fs');
 var util = require('util');
+var url = require('url');
+var _ = require('underscore');
 
-//--webProxy
-var proxy = httpProxy.createProxyServer({});
+// var parser = require('parser');
 
+//--user vars
+var App, proxyAgent, middlewareConfig, server;
 
-//--server
-// var server = require('http').createServer(function(req, res) {
-//   // You can define here your custom logic to handle the request
-//   // and then proxy the request.
-//   proxy.web(req, res, { target: 'http://127.0.0.1:5060' });
-// });
-
-var app = connect()
-  .use(connect.cookieParser())
-  .use(connect.session({
-    secret: 'cobble proxy secrect'
-  }))
-  .use(connect.bodyParser())
-  .use(function(req, res) {
-    proxy.web(req, res, {
-      target: 'http://127.0.0.1:5060'
+//--proxy app 
+App = {
+  start: function(){
+    initProxyAgent();
+    initMiddlewareConfig();
+    initProxyServer();
+    console.log("listening on port 5050")
+    server.listen(5050);
+  },
+  handle: function(req, res, callback) {
+    var proxyAgent = httpProxy.createServer({
+      target: 'todo:req.url'
     });
+  },
+  setJsHeaders: function(res) {
+    res.set("Content-Type", "text/javascript"),
+    res.set("Cache-Control", "no-cache, no-store, must-revalidate"),
+    res.set("Pragma", "no-cache"),
+    res.set("Expires", "0");
+  },
+  requestJsFile: function(req, res ) {
+    res.write('hahha');
+    res.end();
+    // request(url, function(error, clientResponse, body) {
+    //   if (!error && response.statusCode == 200) {
+    //      var body = body;
+    //      res.write('return a parsed js file \n');
+    //      // res.write(body);
+    //      res.end();
+    //   }
+    // });
+  },
+  jsParser: function(){
+    var self = this;
+
+    return function (req, res, next){
+      var reg = /.js$/gi;
+      var parsedUrl = req.parsedUrl = url.parse("http:" + req.headers.host + req.url);
+
+      if(reg.test(parsedUrl.pathname) > 0){
+        self.requestJsFile(req, res);
+      } else{
+        proxyAgent.web(req, res, {target:  'http://localhost:5060'});//parsedUrl.pathname});
+      }
+
+    }
+  }
+};
+
+App.start();
+
+function parseReqUrl(req){
+  var host = req.headers.host;
+  return url.parse(req.url);
+}
+
+function initProxyAgent() {
+  proxyAgent = httpProxy.createProxyServer({});
+  proxyAgent.on('proxyRes', function(res) {
+    console.log('RAW Response from the target', JSON.stringify(res.headers, true, 2));
   });
+}
 
-console.log("listening on port 5050")
-http.createServer(app).listen(5050);
 
-//--the proxy server
+function initMiddlewareConfig() {
+  middlewareConfig = connect()
+    .use(connect.cookieParser())
+    .use(connect.session({
+      secret: 'cobble proxy secrect'
+    }))
+    .use(connect.bodyParser())
+    .use(App.jsParser());
+}
+
+function initProxyServer(){
+  server = http.createServer(middlewareConfig);
+  //--处理各种错误
+  process.on('uncaughtException', function(err) {
+    console.log("\nError!!!!");
+    console.log(err);
+  });
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//--the test server
 http.createServer(function(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/plain'
   });
-  res.write()
-  res.write('request successfully proxied to: ' + req.url + '\n' + JSON.stringify(req.headers, true, 2));
+  res.write('request successfully proxied to: ' + req.url + '\n' + util.inspect(req.headers));
   res.end();
 }).listen(5060);
