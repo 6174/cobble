@@ -29,60 +29,12 @@ var _ = require('underscore');
 //--user vars
 var App, proxyAgent, middlewareConfig, server;
 
-//--proxy app 
-App = {
-  start: function(){
-    initProxyAgent();
-    initMiddlewareConfig();
-    initProxyServer();
-    console.log("listening on port 5050")
-    server.listen(5050);
-  },
-  handle: function(req, res, callback) {
-    var proxyAgent = httpProxy.createServer({
-      target: 'todo:req.url'
-    });
-  },
-  setJsHeaders: function(res) {
-    res.set("Content-Type", "text/javascript"),
-    res.set("Cache-Control", "no-cache, no-store, must-revalidate"),
-    res.set("Pragma", "no-cache"),
-    res.set("Expires", "0");
-  },
-  requestJsFile: function(req, res ) {
-    res.write('hahha');
-    res.end();
-    // request(url, function(error, clientResponse, body) {
-    //   if (!error && response.statusCode == 200) {
-    //      var body = body;
-    //      res.write('return a parsed js file \n');
-    //      // res.write(body);
-    //      res.end();
-    //   }
-    // });
-  },
-  jsParser: function(){
-    var self = this;
-
-    return function (req, res, next){
-      var reg = /.js$/gi;
-      var parsedUrl = req.parsedUrl = url.parse("http:" + req.headers.host + req.url);
-
-      if(reg.test(parsedUrl.pathname) > 0){
-        self.requestJsFile(req, res);
-      } else{
-        proxyAgent.web(req, res, {target:  'http://localhost:5060'});//parsedUrl.pathname});
-      }
-
-    }
-  }
-};
-
-App.start();
-
-function parseReqUrl(req){
-  var host = req.headers.host;
-  return url.parse(req.url);
+function start() {
+  initProxyAgent();
+  initMiddlewareConfig();
+  initProxyServer();
+  console.log("listening on port 5050")
+  server.listen(5050);
 }
 
 function initProxyAgent() {
@@ -100,10 +52,10 @@ function initMiddlewareConfig() {
       secret: 'cobble proxy secrect'
     }))
     .use(connect.bodyParser())
-    .use(App.jsParser());
+    .use(getJsParserMiddleware());
 }
 
-function initProxyServer(){
+function initProxyServer() {
   server = http.createServer(middlewareConfig);
   //--处理各种错误
   process.on('uncaughtException', function(err) {
@@ -112,6 +64,58 @@ function initProxyServer(){
   });
 }
 
+
+
+function getJsParserMiddleware() {
+  return function(req, res, next) {
+    var reg = /.js$/gi;
+
+    var parsedUrl;
+    if(req.originalUrl.indexOf(req.headers.host) >= 0){
+      parsedUrl = req.parsedUrl = url.parse(req.originalUrl);
+    }else{
+      parsedUrl = req.parsedUrl = url.parse('http:' + req.headers.host + req.originalUrl);
+    }
+
+    if (reg.test(parsedUrl.pathname) > 0) {
+      requestJsFile(req, res);
+    } else {
+      handleProxy(req, res);
+    }
+  }
+}
+
+function handleProxy(req, res) {
+  proxyAgent.web(req, res, {
+    target: req.parsedUrl.href //'http://localhost:5060'
+  }); //});
+}
+
+
+function requestJsFile(req, res) {
+  request(req.parsedUrl.href, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var body = body;
+      res.write(body);
+    }
+    res.end();
+  });
+}
+
+function parseReqUrl(req) {
+  var host = req.headers.host;
+  return url.parse(req.url);
+}
+
+function setJsHeaders(res) {
+  res.set("Content-Type", "text/javascript"),
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate"),
+  res.set("Pragma", "no-cache"),
+  res.set("Expires", "0");
+}
+
+
+start();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //--the test server
