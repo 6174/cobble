@@ -19,7 +19,9 @@
     "underscore": "*",
     "request": "*",
     "connect": "*",
-    "url": "*"
+    "url": "*",
+    "escodegen": "*",
+    "esprima": "*"
   },
   "author": "chenxuejia",
   "license": "BSD"
