@@ -21,7 +21,8 @@
     "connect": "*",
     "url": "*",
     "escodegen": "*",
-    "esprima": "*"
+    "esprima": "*",
+    "estraverse": "*"
   },
   "author": "chenxuejia",
   "license": "BSD"
