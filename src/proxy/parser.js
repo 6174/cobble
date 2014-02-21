@@ -42,6 +42,7 @@ var fileName;
 
 //--每个模块的， 可以设定为fileName
 var moduleName = '';
+var blockNameStack = [];
 var options = {
 	insSpyName: 'spy'
 };
@@ -49,81 +50,53 @@ var options = {
 
 function injectInstrument(syntax) {
 	console.log('***************************before\n');
-	console.log(util.inspect(syntax.body, false, 10));
-	console.log(escodegen.generate(syntax));
+	// console.log(util.inspect(syntax.body, false, 10));
+	// console.log(escodegen.generate(syntax));
+	estraverse.traverse(syntax, {
+		enter: function(node, parent) {
+			if (node.type == "Program") {
+				blockNameStack.push(moduleName);
+			} else if (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
+				if (node.id === null) {
+					node.id = getAnonymouseScopeId();
+				}
+				blockNameStack.push(node.id.name);
+			}
+		},
+		leave: function(node, parent) {
+			var blockName = blockNameStack.join('.');
+			if (node.type === 'FunctionExpression') {
+				console.log('functionExpression: ' + blockName);
+				blockNameStack.pop();
+				for(attr in parent){
+					if(parent[attr] === node){
+						parent[attr] = getSpyExpression(node, blockName)
+						return;
+					}
+				}
+				if(parent.type === 'CallExpression'){
+					var index = parent.arguments.indexOf(node);
+					parent.arguments[index] = getSpyExpression(node, blockName);
+				}
 
-
-	traverse(syntax, traverser, {
-		blockName: moduleName,
-		parent: null,
-		key: null
+			} else if (node.type === 'FunctionDeclaration') {
+				console.log('FunctionDeclaration: ' + blockName);
+				blockNameStack.pop();
+				console.log(parent);
+				if (_.isArray(parent)) {
+					var indexOfNode = parent.indexOf(node);
+					parent.splice(indexOf, 0, getSpyExpressionStatement(blockName));
+				}
+			}
+		}
 	});
-	
-
-
 
 	console.log('***************************after\n');
 	console.log(util.inspect(syntax.body, false, 10));
-	// console.log(escodegen.generate(syntax));
+	console.log(escodegen.generate(syntax));
 	return syntax;
 }
 
-// Executes visitor on the object and its children (recursively).
-function traverse(object, visitor, attach) {
-	var key, child;
-
-	var attach = visitor.call(null, object, attach);
-	attach.parent = object;
-
-	for (key in object) {
-		if (object.hasOwnProperty(key)) {
-			child = object[key];
-			if (typeof child === 'object' && child !== null) {
-				attach.key = key;
-				traverse(child, visitor, attach);
-			}
-		}
-	}
-}
-
-function traverser(node, attach) {
-	var type =  node.type;
-	var ret = attach;
-	switch (true) {
-		case type === 'FunctionExpression':
-			ret = handleFunctionExpression(node, attach);
-			console.log('blockName: ' + ret && ret.blockName);
-			break;
-		case type === 'FunctionDeclaration':
-			ret = handleFunctionDeclaration(node, attach);
-			console.log('blockName: ' + ret && ret.blockName);
-			break;
-		default:
-			break;
-	}
-	return ret;
-}
-
-
-function handleFunctionExpression(node, attach) {
-	//--每次traverse过后添加函数的名称全局域名
-	var parantBlockName = attach.blockName ? attach.blockName + '.' : '';
-	if (node.id === null) {
-		node.id = getAnonymouseScopeId();
-	}
-	attach.parent[attach.key] = getSpyExpression(node);
-	return {
-		blockName: parantBlockName + node.id.name
-	}
-}
-
-
-function handleFunctionDeclaration(node, attach) {
-	var parentBlockName = attach.blockName ? attach.blockName + '.' : '';
-	return {
-		blockName: parentBlockName + node.id.name
-	}
-}
 
 
 function getAnonymouseScopeId() {
@@ -173,6 +146,7 @@ function getSpyExpression(functionExpression, id) {
 
 function test() {
 	var code = "var a = function (b){ return function c(){}; } ";
+	code = require('fs').readFileSync('./test/parser_test_file.js');
 	var syntax = esprima.parse(code, {
 		tolerant: true,
 		loc: false,
