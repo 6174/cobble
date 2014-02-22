@@ -82,17 +82,17 @@ function injectInstrument(syntax) {
 			} else if (node.type === 'FunctionDeclaration') {
 				console.log('FunctionDeclaration: ' + blockName);
 				blockNameStack.pop();
-				console.log(parent);
-				if (_.isArray(parent)) {
-					var indexOfNode = parent.indexOf(node);
-					parent.splice(indexOf, 0, getSpyExpressionStatement(blockName));
+				// console.log(parent);
+				if (parent.body) {
+					var indexOfNode = parent.body.indexOf(node);
+					parent.body.splice(indexOfNode, 0, getSpyExpressionStatement(node.id.name, blockName));
 				}
 			}
 		}
 	});
 
 	console.log('***************************after\n');
-	console.log(util.inspect(syntax.body, false, 10));
+	// console.log(util.inspect(syntax.body, false, 10));
 	console.log(escodegen.generate(syntax));
 	return syntax;
 }
@@ -106,7 +106,7 @@ function getAnonymouseScopeId() {
 	}
 }
 
-function getSpyExpressionStatement(id) {
+function getSpyExpressionStatement(name, id) {
 	return {
 		"type": "ExpressionStatement",
 		"expression": {
@@ -117,7 +117,7 @@ function getSpyExpressionStatement(id) {
 			},
 			"arguments": [{
 				"type": "Identifier",
-				"name": "a"
+				"name": name
 			}, {
 				"type": "Literal",
 				"value": id,
