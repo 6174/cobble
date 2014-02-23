@@ -1,0 +1,51 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'E:\\programfiles\\node\\\\node.exe',
+1 verbose cli   'E:\\programfiles\\node\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'star',
+1 verbose cli   'estraverse' ]
+2 info using npm@1.2.14
+3 info using node@v0.10.0
+4 verbose node symlink E:\programfiles\node\\node.exe
+5 verbose url raw estraverse
+6 verbose url resolving [ 'https://registry.npmjs.org/', './estraverse' ]
+7 verbose url resolved https://registry.npmjs.org/estraverse
+8 info trying registry request attempt 1 at 18:01:24
+9 http GET https://registry.npmjs.org/estraverse
+10 http 200 https://registry.npmjs.org/estraverse
+11 info starring estraverse
+12 verbose starring { _id: 'estraverse',
+12 verbose starring   _rev: '41-53b8fe234b09129ed29ee0c721082261',
+12 verbose starring   users: { '6174': true } }
+13 verbose url raw estraverse
+14 verbose url resolving [ 'https://registry.npmjs.org/', './estraverse' ]
+15 verbose url resolved https://registry.npmjs.org/estraverse
+16 info trying registry request attempt 1 at 18:01:25
+17 http PUT https://registry.npmjs.org/estraverse
+18 http 403 https://registry.npmjs.org/estraverse
+19 info trying registry request attempt 1 at 18:01:28
+20 http PUT https://registry.npmjs.org/estraverse
+21 http 403 https://registry.npmjs.org/estraverse
+22 error Error: forbidden user: 6174 not authorized to modify estraverse
+22 error Changed: time.modified "2013-11-25T18:19:17.866Z" -> "2014-02-21T10:01:38.617Z"
+22 error Added: users.6174
+22 error Added: homepage
+22 error Added: bugs: estraverse
+22 error     at RegClient.<anonymous> (E:\programfiles\node\node_modules\npm\node_modules\npm-registry-client\lib\request.js:268:14)
+22 error     at Request.self.callback (E:\programfiles\node\node_modules\npm\node_modules\request\main.js:120:22)
+22 error     at Request.EventEmitter.emit (events.js:98:17)
+22 error     at Request.<anonymous> (E:\programfiles\node\node_modules\npm\node_modules\request\main.js:648:16)
+22 error     at Request.EventEmitter.emit (events.js:117:20)
+22 error     at IncomingMessage.<anonymous> (E:\programfiles\node\node_modules\npm\node_modules\request\main.js:610:14)
+22 error     at IncomingMessage.EventEmitter.emit (events.js:117:20)
+22 error     at _stream_readable.js:870:14
+22 error     at process._tickCallback (node.js:415:13)
+23 error If you need help, you may report this log at:
+23 error     <http://github.com/isaacs/npm/issues>
+23 error or email it to:
+23 error     <npm-@googlegroups.com>
+24 error System Windows_NT 6.1.7601
+25 error command "E:\\programfiles\\node\\\\node.exe" "E:\\programfiles\\node\\node_modules\\npm\\bin\\npm-cli.js" "star" "estraverse"
+26 error cwd D:\cobble
+27 error node -v v0.10.0
+28 error npm -v 1.2.14
+29 verbose exit [ 1, true ]

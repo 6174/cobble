@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="uft-8">
+	<title>test spy</title>
+	<script src="../src/lib/sea.js"></script>
+	<script src="seajsConfig.js"></script>
+	<!-- // <script src="../src/qt.js"></script> -->
+</head>
+<body>
+<script type="text/javascript">
+	seajs.use(['spy', 'util', '_','jquery'], function(spy, util,  _){
+
+		var func = spy(function func1(a, b){
+			console.log('func1 called');
+			return a + b;
+		}, 'namespace.');
+
+		spy.on('call-namespace.func1', function(e){
+			console.log("called func1");
+		});
+
+		window.func = func;
+		console.log(func.callCount);
+		func(1, 2);
+		console.log(func.callCount);
+		func(3, 4);
+		console.log(func.callCount);
+		window.util = util;
+		window.spy = spy;
+
+		window._ = _;
+	});
+</script>
+</body>
+</html>>
